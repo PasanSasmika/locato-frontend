@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, Image, SafeAreaView, ScrollView } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Image, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { Link } from 'expo-router'
@@ -25,6 +25,8 @@ export default function Login() {
     setGreeting(getGreeting());
   }, []);
   return (
+    <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS ==="ios"? "padding":"height"}>
+    
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView contentContainerClassName="flex-grow px-6 pt-6 pb-6">
         {/* Logo */}
@@ -93,12 +95,13 @@ export default function Login() {
       <Text className="text-gray-900 text-[22px] font-semibold">Service</Text>
     </View>
     <View className="bg-[#C0DCF3] rounded-full w-10 h-10 items-center justify-center">
-      <Ionicons name="arrow-forward" size={18} color="black" />
+      <Ionicons name="albums" size={18} color="black" />
     </View>
   </View>
 </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   )
 }
