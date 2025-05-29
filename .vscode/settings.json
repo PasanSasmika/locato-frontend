@@ -1,21 +1,7 @@
 {
-  "tailwindCSS.includeLanguages": {
-    "javascript": "javascriptreact",
-    "typescript": "typescriptreact"
-  },
-  "editor.quickSuggestions": {
-    "strings": true
-  },
-  "tailwindCSS.experimental.classRegex": [
-    "class\\s*=\\s*\"([^\"]*)\"",
-    "class\\s*=\\s*'([^']*)'",
-    "class\\s*=\\s*`([^`]*)`",
-    "className\\s*=\\s*\"([^\"]*)\"",
-    "className\\s*=\\s*'([^']*)'",
-    "className\\s*=\\s*`([^`]*)`",
-    "tw\\s*`([^`]*)`",
-    "tw=\"([^\"]*)\"",
-    "tw='([^']*)'",
-    "tw`([^`]*)`"
-  ]
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  }
 }
