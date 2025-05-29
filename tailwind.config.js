@@ -12,6 +12,10 @@ module.exports = {
       colors: {
         background: '#F0F8FF', // Replace with your actual background color from COLORS
       },
+       fontFamily: {
+      main: ['Poppins-Regular'],
+      'main-bold': ['Poppins-Bold'],
+    },
     },
   },
   plugins: [
