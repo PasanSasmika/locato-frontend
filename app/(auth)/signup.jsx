@@ -1,16 +1,30 @@
-import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Link, useRouter } from 'expo-router'
 import { Image } from 'react-native'
+import { useAuthStore } from '../../store/authStore'
 
 export default function Signup() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+
+  const {user, isLoading, register} = useAuthStore();
  const router = useRouter();
 
-  
+   const handleSignup = async ()=>{
+    const result = await register(firstName,lastName,email,password);
+
+   if (result.success) {
+    // Get the current state from the auth store
+    const { user, token } = useAuthStore.getState();
+    console.log("User:", user);
+    console.log("Token:", token);
+  } else {
+    Alert.alert("Error", result.error || "Something went wrong");
+  }
+   }
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS ==="ios"? "padding":"height"}>
     <SafeAreaView className="flex-1 bg-background">
@@ -66,7 +80,7 @@ export default function Signup() {
         {/* Sign Up Button */}
         <TouchableOpacity 
           className="bg-[#d6f82e] w-full rounded-xl py-4 items-center mb-4"
-          onPress={() => console.log('Sign Up pressed')}
+          onPress={handleSignup} disabled={isLoading}
         >
           <Text className="text-black font-semibold text-lg">Sign Up</Text>
         </TouchableOpacity>
