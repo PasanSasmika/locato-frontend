@@ -1,15 +1,18 @@
-import { View, Text, TextInput, TouchableOpacity, Image, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, Image, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { Link } from 'expo-router'
+import { useAuthStore } from '../../store/authStore'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [greeting, setGreeting] = useState('Welcome Back')
+   const {user, isLoading, login , token} = useAuthStore();  
 
+// Function to get time-based greeting
   useEffect(() => {
-    // Function to get time-based greeting
+    
     const getGreeting = () => {
       const hour = new Date().getHours();
       
@@ -24,6 +27,22 @@ export default function Login() {
     
     setGreeting(getGreeting());
   }, []);
+
+  const handleLogin = async () => {
+  const result = await login(email, password);
+  
+  if (result.success) {
+      const { user, token } = useAuthStore.getState();
+       console.log("User:", user);
+    console.log("Token:", token);
+    
+    console.log("Login successful!");
+   
+  } else {
+    Alert.alert("Login Failed", result.error);
+  }
+};
+
   return (
     <KeyboardAvoidingView style={{flex:1}} behavior={Platform.OS ==="ios"? "padding":"height"}>
     
@@ -64,7 +83,7 @@ export default function Login() {
         {/* Login Button */}
         <TouchableOpacity 
           className="bg-[#d6f82e] w-96 rounded-xl py-4 items-center mb-4"
-          onPress={() => console.log('Login pressed')}
+          onPress={handleLogin} disabled={isLoading}
         >
           <Text className="text-black font-semibold text-lg">Login</Text>
         </TouchableOpacity>
