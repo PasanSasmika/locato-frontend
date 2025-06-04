@@ -1,14 +1,15 @@
 import { View, Text, TextInput, TouchableOpacity, Image, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
 import { useAuthStore } from '../../store/authStore'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [greeting, setGreeting] = useState('Welcome Back')
-   const {user, isLoading, login , token} = useAuthStore();  
+  const {user, isLoading, login , token} = useAuthStore();  
+  const router = useRouter();
 
 // Function to get time-based greeting
   useEffect(() => {
@@ -106,7 +107,7 @@ export default function Login() {
          {/* List Service Button */}
 <TouchableOpacity 
   className="bg-[#D2E7F9] w-[208px] mt-3 h-[105px] rounded-xl p-4 self-start"
-  onPress={() => console.log('List service pressed')}
+  onPress={() => router.push('/(listService)')}
 >
   <View className="flex-row justify-between items-start">
     <View className="mt-9">

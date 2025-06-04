@@ -11,6 +11,7 @@ export default function RootLayout() {
   <Stack  screenOptions={{headerShown: false}}>
     <Stack.Screen name="index" />
     <Stack.Screen name="(auth)" />
+     <Stack.Screen name="(listService)" />
   </Stack>
   </SafeScreen>
   <StatusBar style="dark"/>
