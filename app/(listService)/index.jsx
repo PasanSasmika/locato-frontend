@@ -1,70 +1,85 @@
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
 
 export default function ServiceCat() {
-  const mockdata = [
-    {
-      id: "1",
-      sectionTitle: "Tuition and Education",
-      categories: [
-        { id: "1-1", category: "Tuition", type: "tuition", color: "#E3F2FD" }
-      ]
-    },
-    {
-      id: "2", 
-      sectionTitle: "Health Care",
-      categories: [
-        { id: "2-1", category: "Pharmacy", type: "pharmacy", color: "#F1F8E9" },
-        { id: "2-2", category: "Hospital", type: "hospital", color: "#FCE4EC" },
-        { id: "2-3", category: "Private", type: "private", color: "#E8F5E8" },
-        { id: "2-4", category: "Labs", type: "labs", color: "#E3F2FD" },
-        { id: "2-5", category: "Ayurvedha", type: "ayurvedha", color: "#FFEBEE" }
-      ]
-    },
-    {
-      id: "3",
-      sectionTitle: "Beauty & Wellness", 
-      categories: [
-        { id: "3-1", category: "Saloons", type: "saloons", color: "#FFEBEE" },
-        { id: "3-2", category: "Spas", type: "spas", color: "#F9FBE7" },
-        { id: "3-3", category: "Makeup", type: "makeup", color: "#E8F5E8" },
-        { id: "3-4", category: "Fitness Centers", type: "fitness", color: "#E3F2FD" }
-      ]
-    }
-  ]
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Define color palette for categories
+  const colors = [
+    "#D2E7F9", 
+    "#EFF9D2", 
+    "#F8D2F9", 
+    "#F9D2D3", 
+    "#D2F9DF", 
+    "#F9FBE7", 
+    "#FFF3E0", 
+    "#E0F7FA", 
+  ];
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        // Replace with your actual backend URL
+        const response = await axios.get('https://locato-backend.onrender.com/api/serviceCat/');
+        
+        // Transform backend data to match frontend structure
+        const transformedData = response.data.map((categoryDoc, index) => ({
+          id: categoryDoc._id,
+          sectionTitle: categoryDoc.Category,
+          categories: categoryDoc.subCategories.map((subCat, subIndex) => ({
+            id: `${categoryDoc._id}-${subIndex}`,
+            category: subCat,
+            type: subCat.toLowerCase().replace(/\s+/g, '-'),
+            color: colors[(index + subIndex) % colors.length]
+          }))
+        }));
+        
+        setCategories(transformedData);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleCategoryPress = (category) => {
     console.log('Selected category:', category);
-    // Handle category selection here
-  }
+    // Handle navigation or state update here
+  };
 
   const renderCategoryCard = (item) => (
-  <TouchableOpacity
-    key={item.id}
-    className="rounded-[16px] mb-[12px] min-w-[48%] max-w-[48%] h-[90px] p-4"
-    style={{
-      backgroundColor: item.color,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-    }}
-    onPress={() => handleCategoryPress(item)}
-  >
-    <View className="flex-1 justify-between">
-      <View className="flex-row justify-end">
-        <View className="bg-white bg-opacity-50 rounded-full w-10 h-10 items-center justify-center">
-          <Ionicons name="albums" size={18} color="black" />
+    <TouchableOpacity
+      key={item.id}
+      className="rounded-[16px] mb-[12px] min-w-[48%] max-w-[48%] h-[90px] p-4"
+      style={{
+        backgroundColor: item.color,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      }}
+      onPress={() => handleCategoryPress(item)}
+    >
+      <View className="flex-1 justify-between">
+        <View className="flex-row justify-end">
+          <View className="bg-[#d6f7fa] bg-opacity-50 rounded-full w-10 h-10 items-center justify-center">
+            <Ionicons name="albums" size={18} color="black" />
+          </View>
         </View>
+        <Text className="text-[18px] font-normal text-gray-900">
+          {item.category}
+        </Text>
       </View>
-      <Text className="text-[18px] font-normal text-gray-900">
-        {item.category}
-      </Text>
-    </View>
-  </TouchableOpacity>
-)
+    </TouchableOpacity>
+  );
 
   const renderSection = (section) => (
     <View key={section.id} className="mb-[30px]">
@@ -77,8 +92,24 @@ export default function ServiceCat() {
     </View>
   );
 
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center bg-background items-center">
+       <ActivityIndicator size={30} className="text-[#d6f82e]"/>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
+
   return (
-   <ScrollView 
+    <ScrollView 
       className="flex-1 bg-background px-[20px]"
       showsVerticalScrollIndicator={false}
     >
@@ -91,7 +122,7 @@ export default function ServiceCat() {
         </Text>
       </View>
       
-      {mockdata.map(renderSection)}
+      {categories.map(renderSection)}
     </ScrollView>
-  )
+  );
 }
