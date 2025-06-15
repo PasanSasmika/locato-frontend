@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import { router, useNavigation } from 'expo-router';
 
 export default function ServiceCat() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const navigation = useNavigation();
   // Define color palette for categories
   const colors = [
     "#D2E7F9", 
@@ -23,10 +24,9 @@ export default function ServiceCat() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // Replace with your actual backend URL
+       
         const response = await axios.get('https://locato-backend.onrender.com/api/serviceCat/');
         
-        // Transform backend data to match frontend structure
         const transformedData = response.data.map((categoryDoc, index) => ({
           id: categoryDoc._id,
           sectionTitle: categoryDoc.Category,
@@ -49,9 +49,17 @@ export default function ServiceCat() {
     fetchCategories();
   }, []);
 
-  const handleCategoryPress = (category) => {
+ const handleCategoryPress = (category) => {
     console.log('Selected category:', category);
-    // Handle navigation or state update here
+    router.push({
+      pathname: '/(listService)/serviceApplication',
+      params: { 
+        categoryId: category.id,
+        categoryName: category.category,
+        categoryType: category.type,
+        parentCategory: category.parentCategory
+      }
+    });
   };
 
   const renderCategoryCard = (item) => (

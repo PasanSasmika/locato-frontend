@@ -1,10 +1,8 @@
 import { View, Text } from 'react-native'
 import React from 'react'
+import { Stack } from 'expo-router'
 
 export default function layout() {
-  return (
-    <View>
-      <Text>layout</Text>
-    </View>
-  )
+   return <Stack screenOptions={{headerShown: false}}/>
+  
 }
