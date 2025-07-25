@@ -25,7 +25,7 @@ export default function ServiceCat() {
     const fetchCategories = async () => {
       try {
        
-        const response = await axios.get('https://locato-backend.onrender.com/api/serviceCat/');
+        const response = await axios.get('https://locato-backend-wxjj.onrender.com/api/serviceCat/');
         
         const transformedData = response.data.map((categoryDoc, index) => ({
           id: categoryDoc._id,
@@ -126,7 +126,7 @@ export default function ServiceCat() {
           Pick the Perfect Category
         </Text>
         <Text className="text-[28px] font-bold text-[#333] leading-[34px]">
-          for You
+          for you
         </Text>
       </View>
       

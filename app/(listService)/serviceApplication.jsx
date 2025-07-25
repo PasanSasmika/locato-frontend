@@ -126,7 +126,7 @@ export default function ServiceApplication() {
       };
 
       const response = await axios.post(
-        'https://locato-backend.onrender.com/api/service/serviceReq',
+        'https://locato-backend-wxjj.onrender.com/api/service/serviceReq',
         requestData
       );
 
