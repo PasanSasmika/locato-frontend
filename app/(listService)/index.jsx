@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { UIActivityIndicator } from 'react-native-indicators';
+
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { router, useNavigation } from 'expo-router';
@@ -103,7 +105,7 @@ export default function ServiceCat() {
   if (loading) {
     return (
       <View className="flex-1 justify-center bg-background items-center">
-       <ActivityIndicator size={30} className="text-[#d6f82e]"/>
+       <UIActivityIndicator size={30} className="text-[#d6f82e]"/>
       </View>
     );
   }

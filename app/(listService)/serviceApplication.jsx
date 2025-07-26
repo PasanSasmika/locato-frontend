@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { UIActivityIndicator } from 'react-native-indicators';
+
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
@@ -260,7 +262,7 @@ export default function ServiceApplication() {
                   disabled={compressing}
                 >
                   {compressing ? (
-                    <ActivityIndicator size="small" color="#3b82f6" />
+                    <UIActivityIndicator size="small" color="#3b82f6" />
                   ) : (
                     <View className="items-center">
                       <Text className="text-blue-700 font-semibold text-base">
@@ -307,7 +309,7 @@ export default function ServiceApplication() {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="white" size="small" />
+                <UIActivityIndicator color="white" size="small" />
               ) : (
                 <Text className="text-white font-bold text-lg">Submit Request</Text>
               )}
