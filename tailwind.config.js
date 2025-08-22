@@ -11,7 +11,9 @@ module.exports = {
     extend: {
       colors: {
         background: '#212121',
-        secondary: '#D5FF44'
+        secondary: '#D5FF44',
+        colorA: '#f2eb58',
+        colorB: '#79dcff',
       },
        fontFamily: {
       main: ['Poppins-Regular'],

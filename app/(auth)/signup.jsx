@@ -42,10 +42,10 @@ export default function Signup() {
       style={{ flex: 1 }} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <SafeAreaView className="flex-1 bg-background">
-        <ScrollView contentContainerClassName="flex-grow px-6 pt-6 pb-6">
+      <SafeAreaView className="flex-1 bg-white">
+        <ScrollView contentContainerClassName="flex-grow px-6 pt-6 pb-6 items-center">
           {/* Logo */}
-          <View className="mb-6 items-center">
+          <View className="mb-6">
             <Image 
               source={require('../../assets/images/logoII.png')} 
               className="w-[180px] h-[180px]" 
@@ -54,31 +54,43 @@ export default function Signup() {
           </View>
 
           {/* Welcome Text */}
-          <View className="mb-11">
-            <Text className="text-3xl px-3 mt-2 font-semibold text-white">
-              Create Your Account
+          <View className="mb-12 w-full">
+            <Text className="text-5xl font-serif font-medium text-black text-left mb-2">
+              Hey,
             </Text>
+            <Text className="text-5xl font-serif font-medium text-black text-left mb-4">
+              Sign Up Now!
+            </Text>
+            <View className="flex-row items-center mt-2">
+              <Text className="text-base text-gray-600">
+                I Am An Existing User /
+              </Text>
+              {/* Updated link style to be black and bold */}
+              <Link href="/" asChild>
+                <TouchableOpacity>
+                  <Text className="text-base text-black font-bold ml-1">Login</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
 
           {/* Input Fields */}
-          <View className="space-y-4 mb-6 gap-4">
-            {/* First Name - Full width */}
-            <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-4">
-              <Ionicons name="person-outline" size={20} color="#888" />
+          <View className="space-y-4 w-full mb-6">
+            {/* First Name */}
+            <View className="flex-row items-center bg-gray-100 rounded-md px-4 py-6 mb-2">
               <TextInput
-                className="flex-1 p-4 text-gray-600"
+                className="flex-1 p-0 text-black"
                 placeholder="First Name"
                 value={firstName}
                 onChangeText={setFirstName}
                 autoCapitalize="words"
               />
             </View>
-            
-            {/* Last Name - Full width */}
-            <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-4">
-              <Ionicons name="people-outline" size={20} color="#888" />
+
+            {/* Last Name */}
+            <View className="flex-row items-center bg-gray-100 rounded-md px-4 py-6 mb-2">
               <TextInput
-                className="flex-1 p-4 text-gray-600"
+                className="flex-1 p-0 text-black"
                 placeholder="Last Name"
                 value={lastName}
                 onChangeText={setLastName}
@@ -87,11 +99,10 @@ export default function Signup() {
             </View>
 
             {/* Email */}
-            <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-4">
-              <Ionicons name="mail-outline" size={20} color="#888" />
+            <View className="flex-row items-center bg-gray-100 rounded-md px-4 py-6 mb-2">
               <TextInput
-                className="flex-1 p-4 text-gray-600"
-                placeholder="Enter Your Email"
+                className="flex-1 p-0 text-black"
+                placeholder="Email"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -100,11 +111,10 @@ export default function Signup() {
             </View>
 
             {/* Password */}
-            <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-4">
-              <Ionicons name="lock-closed-outline" size={20} color="#888" />
+            <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-6">
               <TextInput
-                className="flex-1 p-4 text-gray-600"
-                placeholder="Create Password"
+                className="flex-1 p-0 text-black"
+                placeholder="Password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
@@ -114,28 +124,16 @@ export default function Signup() {
 
           {/* Sign Up Button */}
           <TouchableOpacity 
-            className="bg-secondary w-full rounded-xl py-4 items-center mb-4 shadow-lg shadow-gray-800"
+            className="bg-colorA w-full rounded-xl py-4 items-center mb-4"
             onPress={handleSignup}
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color="#000" />
             ) : (
-              <Text className="text-white font-bold text-lg">Sign Up</Text>
+              <Text className="text-black font-bold text-lg">Sign Up Now</Text>
             )}
           </TouchableOpacity>
-
-          {/* Login Link */}
-          <View className="flex-row justify-center mb-12">
-            <Text className="text-white text-[16px] font-thin">
-              Already have an account? 
-            </Text>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text className="text-secondary text-[16px] font-medium ml-1">
-                Login
-              </Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>

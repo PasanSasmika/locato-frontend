@@ -40,11 +40,10 @@ export default function Login() {
       style={{ flex: 1 }} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <SafeAreaView className="flex-1 bg-background">
-        <ScrollView contentContainerClassName="flex-grow px-6 pt-6 pb-6">
-
+      <SafeAreaView className="flex-1 bg-white">
+        <ScrollView contentContainerClassName="flex-grow px-6 pt-6 pb-6 items-center">
           {/* Logo */}
-          <View className="mb-6 items-center">
+          <View className="mb-6">
             <Image 
               source={require('../../assets/images/logoII.png')} 
               className="w-[180px] h-[180px]" 
@@ -53,89 +52,70 @@ export default function Login() {
           </View>
 
           {/* Welcome Text */}
-          <View className="mb-11">
-            <Text className="text-3xl px-3 mt-2 font-semibold text-white">
-              Login to Continue
+          <View className="mb-12 w-full">
+            <Text className="text-5xl font-serif font-medium text-black text-left mb-2">
+              Hey,
             </Text>
+            <Text className="text-5xl font-serif font-medium text-black text-left mb-4">
+              Login Now!
+            </Text>
+            <View className="flex-row items-center mt-2">
+              <Text className="text-base text-gray-600">
+                I Am A New User /
+              </Text>
+              {/* Updated link style to be black and bold */}
+              <Link href="/signup" asChild>
+                <TouchableOpacity>
+                  <Text className="text-base text-black font-bold ml-1">Create New</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
           </View>
 
           {/* Input Fields */}
-          <View className="space-y-4 mb-6 gap-4">
-            {/* Email */}
-            <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-4">
-              <Ionicons name="mail-outline" size={20} color="#888" />
+          <View className="space-y-4 w-full mb-6">
+            {/* Agency */}
+            <View className="flex-row items-center bg-gray-100 rounded-md px-4 py-6 mb-2">
               <TextInput
-                className="flex-1 p-4 text-gray-600"
-                placeholder="Enter Your Email"
+                className="flex-1 p-0 text-black"
+                placeholder="Enter your email"
                 value={email}
                 onChangeText={setEmail}
-                keyboardType="email-address"
                 autoCapitalize="none"
               />
             </View>
 
             {/* Password */}
-            <View className="flex-row items-center bg-white rounded-2xl border border-gray-200 px-4">
-              <Ionicons name="lock-closed-outline" size={20} color="#888" />
+            <View className="flex-row items-center bg-gray-100 rounded-xl px-4 py-6">
               <TextInput
-                className="flex-1 p-4 text-gray-600"
-                placeholder="Enter Your Password"
+                className="flex-1 p-0 text-black"
+                placeholder="Enter your password"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
               />
             </View>
+
+            {/* Forgot Password */}
+            <View className="items-end mt-4">
+              <Text className="text-sm text-black">
+                Forget Password? / Reset
+              </Text>
+            </View>
           </View>
 
           {/* Login Button */}
           <TouchableOpacity 
-            className="bg-secondary w-full rounded-xl py-4 items-center mb-4 shadow-lg shadow-gray-800"
+            className="bg-colorA w-full rounded-xl py-4 items-center mb-4"
             onPress={handleLogin}
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color="#000" />
             ) : (
-              <Text className="text-white font-bold text-lg">Login</Text>
+              <Text className="text-black font-bold text-lg">Login Now</Text>
             )}
           </TouchableOpacity>
-
-          {/* Sign Up Link */}
-          <View className="flex-row justify-center mb-12">
-            <Text className="text-white text-[16px] font-thin">
-              Don't have an account? 
-            </Text>
-            <Link href="/signup" asChild>
-              <Text className="text-secondary text-[16px] font-medium ml-1">
-                Sign up
-              </Text>
-            </Link>
-          </View>
-
-          {/* Tagline */}
-          <View className="mt-4">
-            <Text className="px-3 text-[16px] text-gray-300 font-normal mb-4">
-              Your service belongs on Locato. Let's make it happen.
-            </Text>
-
-            {/* List Your Service Button */}
-            <TouchableOpacity 
-              className="bg-secondary w-56 h-24 rounded-xl p-4 flex-row justify-between items-center"
-              onPress={() => router.push('/(listService)')}
-            >
-              <View>
-                <Text className="text-gray-900 text-[16px] font-medium">
-                  List Your
-                </Text>
-                <Text className="text-gray-900 text-[20px] font-bold">
-                  Service
-                </Text>
-              </View>
-              <View className="bg-gray-100 rounded-full w-10 h-10 items-center justify-center">
-                <Ionicons name="add" size={20} color="black" />
-              </View>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </SafeAreaView>
     </KeyboardAvoidingView>
