@@ -12,8 +12,9 @@ const Stat = ({ value, label }) => (
 );
 
 // Profile card component for reusability
-const ProfileCard = ({ icon, title, subtitle, color, iconColor = 'black' }) => (
-  <TouchableOpacity className={`flex-1 ${color} p-5 rounded-2xl`}>
+const PlanCard = ({ icon, title, subtitle, color, iconColor = 'black',onPress  }) => (
+  <TouchableOpacity className={`flex-1 ${color} p-5 rounded-2xl`}
+  onPress={onPress}>
     <View className="flex-row justify-between items-start">
       <View className="bg-white/30 p-2 rounded-full">
         <Ionicons name={icon} size={24} color={iconColor} />
@@ -70,11 +71,13 @@ export default function Profile() {
               subtitle="Build Your — Portfolio"
               color="bg-yellow-300"
             /> */}
-            <ProfileCard
+            <PlanCard
               icon="flash-outline"
               title="List Your Service"
               subtitle="Add Your Service Details"
               color="bg-colorB"
+            onPress={() => router.push('/(listService)')} // Navigate to listService
+
             />
           </View>
         </View>

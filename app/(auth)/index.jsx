@@ -48,8 +48,8 @@ export default function Login() {
           {/* Logo */}
           <View className="mb-6">
             <Image 
-              source={require('../../assets/images/logoII.png')} 
-              className="w-[180px] h-[180px]" 
+              source={require('../../assets/images/logoIII.png')} 
+              className="w-[200px] h-[200px]" 
               resizeMode="contain"
             />
           </View>
