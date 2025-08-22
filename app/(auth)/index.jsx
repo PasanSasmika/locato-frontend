@@ -19,20 +19,29 @@ import { useAuthStore } from '../../store/authStore';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { isLoading, login, token } = useAuthStore();
+  const { isLoading, login, token ,user } = useAuthStore();
   const router = useRouter();
 
-  useEffect(() => {
-    if (token) {
+
+ const handleRedirect = (userType) => {
+    if (userType === 'customer') {
       router.replace('/(tabs)/home');
+    } else {
+      router.replace('/(serviceDashboards)/');
     }
-  }, [token]);
+  };
+
+ useEffect(() => {
+    if (token && user) {
+      handleRedirect(user.type);
+    }
+  }, [token, user]);
 
   const handleLogin = async () => {
     const result = await login(email, password);
 
     if (result.success) {
-      router.replace('/(tabs)/home');
+      handleRedirect(result.user.type);
     } else {
       Alert.alert('Login Failed', result.error);
     }
