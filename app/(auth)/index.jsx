@@ -11,7 +11,7 @@ import {
   Alert, 
   ActivityIndicator 
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { useAuthStore } from '../../store/authStore';
@@ -19,17 +19,20 @@ import { useAuthStore } from '../../store/authStore';
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { user, isLoading, login, token } = useAuthStore();
+  const { isLoading, login, token } = useAuthStore();
   const router = useRouter();
+
+  useEffect(() => {
+    if (token) {
+      router.replace('/(tabs)/home');
+    }
+  }, [token]);
 
   const handleLogin = async () => {
     const result = await login(email, password);
 
     if (result.success) {
-      const { user, token } = useAuthStore.getState();
-      console.log('User:', user);
-      console.log('Token:', token);
-      console.log('Login successful!');
+      router.replace('/(tabs)/home');
     } else {
       Alert.alert('Login Failed', result.error);
     }
@@ -74,7 +77,7 @@ export default function Login() {
 
           {/* Input Fields */}
           <View className="space-y-4 w-full mb-6">
-            {/* Agency */}
+            {/* Email */}
             <View className="flex-row items-center bg-gray-100 rounded-md px-4 py-6 mb-2">
               <TextInput
                 className="flex-1 p-0 text-black"
