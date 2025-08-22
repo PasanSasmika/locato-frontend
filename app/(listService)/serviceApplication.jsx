@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,27 +6,27 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  ActivityIndicator, // Replaced UIActivityIndicator
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView, // Added for consistency
+  SafeAreaView,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system';
-import { useLocalSearchParams, useRouter } from 'expo-router'; // Added useRouter
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
-import { Ionicons } from '@expo/vector-icons'; // Added for back button
+import { Ionicons } from '@expo/vector-icons';
+import { useAuthStore } from '../../store/authStore';
 
-// FormField component updated to match the app's theme
-const FormField = ({ label, value, onChangeText, keyboardType, multiline }) => (
+const FormField = ({ label, value, onChangeText, keyboardType, multiline, editable = true }) => (
   <View className="mb-4">
     <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
     <TextInput
       className={`bg-gray-100 rounded-xl p-4 text-black ${
         multiline ? 'h-24' : ''
-      }`}
+      } ${!editable ? 'bg-gray-200 text-gray-500' : ''}`}
       placeholder={`Enter ${label.toLowerCase()}`}
       placeholderTextColor="#9CA3AF"
       value={value}
@@ -34,13 +34,16 @@ const FormField = ({ label, value, onChangeText, keyboardType, multiline }) => (
       keyboardType={keyboardType}
       multiline={multiline}
       textAlignVertical={multiline ? 'top' : 'center'}
+      editable={editable}
     />
   </View>
 );
 
 export default function ServiceApplication() {
   const { categoryName } = useLocalSearchParams();
-  const router = useRouter(); // For the back button
+  const router = useRouter();
+  const { user } = useAuthStore();
+
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -55,7 +58,12 @@ export default function ServiceApplication() {
   const [error, setError] = useState('');
   const scrollViewRef = useRef();
 
-  // --- All your functions (handleChange, pickImage, etc.) remain unchanged ---
+  useEffect(() => {
+    if (user?.email) {
+      setFormData(prev => ({ ...prev, email: user.email }));
+    }
+  }, [user]);
+
   const handleChange = (name, value) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
@@ -130,7 +138,7 @@ export default function ServiceApplication() {
         'https://locato-backend-wxjj.onrender.com/api/service/serviceReq',
         requestData
       );
-      setFormData({ email: '', firstName: '', lastName: '', mobileNo: '', nic: '', address: '' });
+      setFormData({ email: user?.email || '', firstName: '', lastName: '', mobileNo: '', nic: '', address: '' });
       setImage(null);
       Alert.alert('Success', 'Service request submitted successfully!');
     } catch (err) {
@@ -144,13 +152,11 @@ export default function ServiceApplication() {
       setLoading(false);
     }
   };
-  // --- End of unchanged functions ---
-
+  
   return (
     <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
         <ScrollView ref={scrollViewRef} contentContainerClassName="p-6">
-          {/* Themed Header */}
           <View className="flex-row items-center mb-8">
             <TouchableOpacity onPress={() => router.back()} className="mr-4 p-1">
               <Ionicons name="arrow-back" size={28} color="black" />
@@ -161,20 +167,20 @@ export default function ServiceApplication() {
             </View>
           </View>
 
-          {/* Error Message */}
           {error ? (
             <View className="bg-red-50 p-4 rounded-xl mb-4 border border-red-200">
               <Text className="text-red-600 text-center font-medium">{error}</Text>
             </View>
           ) : null}
 
-          {/* Form Fields */}
           <FormField
             label="Email Address"
             value={formData.email}
             onChangeText={(text) => handleChange('email', text)}
             keyboardType="email-address"
+            editable={false}
           />
+
           <View className="flex-row space-x-4 gap-2">
             <View className="flex-1">
               <FormField
@@ -191,6 +197,7 @@ export default function ServiceApplication() {
               />
             </View>
           </View>
+          
           <View className="flex-row space-x-4 gap-2">
             <View className="flex-1">
               <FormField
@@ -208,6 +215,7 @@ export default function ServiceApplication() {
               />
             </View>
           </View>
+          
           <FormField
             label="Full Address"
             value={formData.address}
@@ -215,7 +223,6 @@ export default function ServiceApplication() {
             multiline={true}
           />
 
-          {/* Themed Image Upload Section */}
           <View className="mt-4">
             <Text className="text-gray-600 mb-2 font-medium">Proof Document</Text>
             <View className="flex-row items-center space-x-4">
@@ -254,7 +261,6 @@ export default function ServiceApplication() {
             </View>
           </View>
 
-          {/* Themed Submit Button */}
           <TouchableOpacity
             className="bg-colorA w-full rounded-xl py-4 items-center mt-8"
             onPress={handleSubmit}

@@ -30,7 +30,7 @@ const PlanCard = ({ icon, title, subtitle, color, iconColor = 'black',onPress  }
 
 export default function Profile() {
   const router = useRouter();
-  const { user, logout } = useAuthStore(); // Using the user from your auth store
+  const { user, logout } = useAuthStore();
 
   return (
     <SafeAreaView className="flex-1 bg-white">
