@@ -48,7 +48,7 @@ export default function Login() {
       router.replace('/(serviceDashboards)/PrivateDashboard');
     } else if (userType === 'Labs') {
       router.replace('/(serviceDashboards)/LabsDashboard');
-    } else if (userType === 'Ayurveda') {
+    } else if (userType === 'Ayruwedha') {
       router.replace('/(serviceDashboards)/AyurvedaDashboard');
     } else if (userType === 'Saloon') {
       router.replace('/(serviceDashboards)/SaloonDashboard');
