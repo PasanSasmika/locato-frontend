@@ -1,65 +1,193 @@
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
+import {
+  View, Text, TextInput, ScrollView, TouchableOpacity, Image,
+  ActivityIndicator, Alert, KeyboardAvoidingView, Platform, SafeAreaView,
+} from 'react-native';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 import { useRouter } from 'expo-router';
-import { useAuthStore } from '../../store/authStore';
+import axios from 'axios';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function TuitionDashboard() {
-  // Get user info and logout function from your Zustand store
-  const { user, logout } = useAuthStore();
+// Reusable Components
+const FormField = ({ label, value, onChangeText, placeholder, keyboardType = 'default' }) => (
+  <View className="mb-4">
+    <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
+    <TextInput
+      className="bg-gray-100 rounded-xl p-4 text-black border border-gray-200"
+      placeholder={placeholder} placeholderTextColor="#9CA3AF"
+      value={value} onChangeText={onChangeText} keyboardType={keyboardType}
+    />
+  </View>
+);
+
+const SelectionField = ({ label, options, selectedValue, onSelect }) => (
+  <View className="mb-4">
+    <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
+    <View className="flex-row flex-wrap gap-2">
+      {options.map((option) => (
+        <TouchableOpacity
+          key={option} onPress={() => onSelect(option)}
+          className={`px-4 py-2 rounded-full border ${selectedValue === option ? 'bg-blue-600 border-blue-600' : 'bg-gray-100 border-gray-200'}`}
+        >
+          <Text className={`font-medium ${selectedValue === option ? 'text-white' : 'text-gray-700'}`}>
+            {option}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </View>
+);
+
+// Main Component
+export default function CreatePharmacy() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    openHours: '',
+    service247: null,
+    deliveryAvailable: null,
+    contactNo: '',
+    location: '',
+    nextUpdateDate: '',
+    images: [],
+  });
 
-  const handleLogout = () => {
-    logout();
-    router.replace('/'); // Go back to the login screen
-    Alert.alert("Logged Out", "You have been successfully logged out.");
+  const handleChange = (name, value) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const pickImages = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        // Fixed line: Use ImagePicker.MediaTypeOptions instead of MediaType
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.7,
+      });
+  
+      if (!result.canceled && result.assets) {
+        setLoading(true); // Show loader while processing images
+        const processedImages = [];
+        for (const asset of result.assets) {
+          const compressed = await ImageManipulator.manipulateAsync(
+            asset.uri,
+            [{ resize: { width: 800 } }],
+            { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+          processedImages.push(`data:image/jpeg;base64,${base64}`);
+        }
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...processedImages] }));
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Image processing error:', err);
+      setError('Failed to process images.');
+      setLoading(false);
+    }
+  };
+  
+  const removeImage = (index) => {
+    setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name || !formData.contactNo || !formData.location) {
+      setError('Please fill in the Name, Contact, and Location fields.');
+      return false;
+    }
+    if (formData.service247 === null || formData.deliveryAvailable === null) {
+      setError('Please select options for 24/7 Service and Delivery.');
+      return false;
+    }
+    setError('');
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+    
+    setLoading(true);
+    const submissionData = {
+      ...formData,
+      service247: formData.service247 === 'Yes',
+      deliveryAvailable: formData.deliveryAvailable === 'Yes',
+    };
+    
+    try {
+      const API_URL = 'https://locato-backend-wxjj.onrender.com/api/pharmacies';
+      const response = await axios.post(API_URL, submissionData);
+      
+      if (response.status === 201) {
+        Alert.alert('Success!', 'Pharmacy listing has been created.');
+        router.back();
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'An error occurred while submitting.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
-      <ScrollView contentContainerClassName="p-6">
-        {/* Header */}
-        <View className="mb-8">
-          <Text className="text-3xl font-bold text-gray-800">
-            Tuition Dashboard
-          </Text>
-          <Text className="text-lg text-gray-500 mt-1">
-            Welcome, {user?.name || 'Teacher'}!
-          </Text>
-        </View>
-
-        {/* Stats Cards Section */}
-        <View className="flex-row justify-around mb-8">
-          <View className="bg-white p-4 rounded-lg shadow-md flex-1 mx-2 items-center">
-            <Text className="text-4xl font-bold text-blue-600">15</Text>
-            <Text className="text-md text-gray-500 mt-1">Total Students</Text>
-          </View>
-          <View className="bg-white p-4 rounded-lg shadow-md flex-1 mx-2 items-center">
-            <Text className="text-4xl font-bold text-green-600">4</Text>
-            <Text className="text-md text-gray-500 mt-1">Upcoming Classes</Text>
-          </View>
-        </View>
-
-        {/* Quick Actions Section */}
-        <View className="mb-8">
-          <Text className="text-xl font-semibold text-gray-700 mb-4">Quick Actions</Text>
-          <View className="bg-white p-4 rounded-lg shadow-md">
-            <TouchableOpacity className="bg-blue-500 p-4 rounded-lg items-center mb-3">
-              <Text className="text-white font-bold text-lg">Schedule a New Class</Text>
+    <SafeAreaView className="flex-1 bg-white">
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView contentContainerClassName="p-6">
+          <View className="flex-row items-center mb-6">
+            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+              <Ionicons name="arrow-back" size={28} color="#1F2937" />
             </TouchableOpacity>
-            <TouchableOpacity className="bg-gray-200 p-4 rounded-lg items-center">
-              <Text className="text-black font-bold text-lg">View All Students</Text>
-            </TouchableOpacity>
+            <Text className="text-3xl font-bold text-gray-800 ml-2">Add New Pharmacy</Text>
           </View>
-        </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity 
-          onPress={handleLogout}
-          className="bg-red-500 p-4 rounded-lg items-center mt-6"
-        >
-          <Text className="text-white font-bold text-lg">Logout</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          {error && <View className="bg-red-100 p-3 rounded-lg mb-4 border border-red-200"><Text className="text-red-700 text-center">{error}</Text></View>}
+
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Pharmacy Information</Text>
+            <FormField label="Name" placeholder="e.g., Union Pharmacy" value={formData.name} onChangeText={v => handleChange('name', v)} />
+            <FormField label="Location" placeholder="e.g., Colombo 3" value={formData.location} onChangeText={v => handleChange('location', v)} />
+            <FormField label="Contact No." placeholder="Enter primary phone number" value={formData.contactNo} onChangeText={v => handleChange('contactNo', v)} keyboardType="phone-pad" />
+            <FormField label="Open Hours" placeholder="e.g., 8:00 AM - 10:00 PM" value={formData.openHours} onChangeText={v => handleChange('openHours', v)} />
+          </View>
+          
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Services</Text>
+            <SelectionField label="24/7 Service" options={['Yes', 'No']} selectedValue={formData.service247} onSelect={v => handleChange('service247', v)} />
+            <SelectionField label="Delivery Available" options={['Yes', 'No']} selectedValue={formData.deliveryAvailable} onSelect={v => handleChange('deliveryAvailable', v)} />
+          </View>
+
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Other Details</Text>
+            <FormField label="Next Update Date" placeholder="YYYY-MM-DD" value={formData.nextUpdateDate} onChangeText={v => handleChange('nextUpdateDate', v)} />
+            <Text className="text-gray-600 mb-2 font-medium">Images</Text>
+            <TouchableOpacity onPress={pickImages} className="border-2 border-dashed border-gray-300 rounded-xl p-6 items-center justify-center bg-gray-50 mb-4">
+              <Ionicons name="cloud-upload-outline" size={40} color="gray" />
+              <Text className="text-gray-500 mt-2">Tap to upload pharmacy images</Text>
+            </TouchableOpacity>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {formData.images.map((uri, index) => (
+                <View key={index} className="relative mr-3">
+                  <Image source={{ uri }} className="w-24 h-24 rounded-lg" />
+                  <TouchableOpacity onPress={() => removeImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
+                    <Ionicons name="close" size={16} color="white" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+
+          <TouchableOpacity onPress={handleSubmit} disabled={loading} className="bg-blue-600 w-full rounded-xl py-4 items-center mt-4">
+            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text className="text-white font-bold text-lg">Create Pharmacy Listing</Text>}
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
