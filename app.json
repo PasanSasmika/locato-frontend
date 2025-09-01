@@ -15,28 +15,28 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.pasan-sasmika.locatofrontend",
-      "config": {
-        "googleMapsApiKey": "AIzaSyBsAQ7vukUMmSyj4RpPEdUCofIwaStmtp0" 
-      },
+       "config": {
+    "googleMapsApiKey": "AIzaSyDp55N6wtbStL4cfraIYyf3yvAH47W7fjs" 
+  },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show it on the map and find nearby services."
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "permissions": [
-        "android.permission.ACCESS_FINE_LOCATION"
-      ],
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyBsAQ7vukUMmSyj4RpPEdUCofIwaStmtp0"
-        }
-      },
-      "package": "com.pasan_sasmika.locatofrontend"
-    },
+  "adaptiveIcon": {
+    "foregroundImage": "./assets/images/adaptive-icon.png",
+    "backgroundColor": "#ffffff"
+  },
+  "permissions": [
+    "android.permission.ACCESS_FINE_LOCATION"
+  ],
+  "config": {
+    "googleMaps": {
+      "apiKey": "AIzaSyDp55N6wtbStL4cfraIYyf3yvAH47W7fjs"
+    }
+  },
+  "package": "com.pasan_sasmika.locatofrontend"
+},
     "web": {
       "bundler": "metro",
       "output": "static",

@@ -64,7 +64,6 @@ const SelectionField = ({ label, options, selectedValue, onSelect }) => (
   </View>
 );
 
-
 export default function CreateTuition() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -80,7 +79,7 @@ export default function CreateTuition() {
     teachingMode: '',
     feeRange: '',
     languageMedium: '',
-    location: '',
+    location: '', // Changed to string to match backend expectation
     description: '',
     contactInfo: {
       phone: '',
@@ -127,8 +126,18 @@ export default function CreateTuition() {
 
   const pickImages = async () => {
     try {
+      // FIX: Use the correct API based on available options
+      let mediaTypes;
+      if (ImagePicker.MediaTypeOptions) {
+        // Older API
+        mediaTypes = ImagePicker.MediaTypeOptions.Images;
+      } else {
+        // Newer API - use MediaType instead
+        mediaTypes = ImagePicker.MediaType.Images;
+      }
+      
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes,
         allowsMultipleSelection: true, // Allow multiple images
         quality: 0.7,
       });
@@ -180,7 +189,6 @@ export default function CreateTuition() {
     return true;
   };
 
-
   const handleSubmit = async () => {
     if (!validateForm()) return;
     
@@ -190,11 +198,17 @@ export default function CreateTuition() {
       // IMPORTANT: Replace with your network IP address, not localhost.
       const API_URL = 'https://locato-backend-wxjj.onrender.com/api/dashboard/';
       
+      // FIX: Send location as a string instead of object
       const response = await axios.post(API_URL, formData);
       
       if (response.status === 201) {
         Alert.alert('Success!', 'Your tuition listing has been created.');
-        router.back(); // Go back to the previous screen
+        // Safe navigation back
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/'); // Fallback to home if no back stack
+        }
       }
     } catch (err) {
       console.error('Submission Error:', err.response?.data || err.message);
@@ -213,7 +227,16 @@ export default function CreateTuition() {
         <ScrollView contentContainerClassName="p-6">
           {/* Header */}
           <View className="flex-row items-center mb-6">
-            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <TouchableOpacity 
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace('/');
+                }
+              }} 
+              className="p-2 -ml-2"
+            >
               <Ionicons name="arrow-back" size={28} color="#1F2937" />
             </TouchableOpacity>
             <Text className="text-3xl font-bold text-gray-800 ml-2">Create Tuition Listing</Text>
