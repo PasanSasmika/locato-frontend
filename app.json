@@ -16,7 +16,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.pasan-sasmika.locatofrontend",
        "config": {
-    "googleMapsApiKey": "AIzaSyDp55N6wtbStL4cfraIYyf3yvAH47W7fjs" 
+    "googleMapsApiKey": "API_Key" 
   },
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show it on the map and find nearby services."
@@ -32,7 +32,7 @@
   ],
   "config": {
     "googleMaps": {
-      "apiKey": "AIzaSyDp55N6wtbStL4cfraIYyf3yvAH47W7fjs"
+      "apiKey": "API_Key"
     }
   },
   "package": "com.pasan_sasmika.locatofrontend"

@@ -56,7 +56,7 @@ export default function Login() {
       router.replace('/(serviceDashboards)/SpaDashboard');
     } else if (userType === 'Fitness Center') {
       router.replace('/(serviceDashboards)/FitnessCenterDashboard');
-    } else if (userType === 'Bridle makeup/ Beauty care') {
+    } else if (userType === 'Bridle makeup & Beauty') {
       router.replace('/(serviceDashboards)/BridlemakeupBeautycareDashboard');
     } else {
       // This is a fallback for any other user type
