@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
+  View, Text, TextInput, ScrollView, TouchableOpacity, Image,
+  ActivityIndicator, Alert, KeyboardAvoidingView, Platform, SafeAreaView,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -19,131 +10,115 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 
-// A reusable styled form field component
+// Reusable Components
 const FormField = ({ label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false }) => (
   <View className="mb-4">
     <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
     <TextInput
-      className={`bg-gray-100 rounded-xl p-4 text-black border border-gray-200 ${multiline ? 'h-28' : ''}`}
-      placeholder={placeholder}
-      placeholderTextColor="#9CA3AF"
-      value={value}
-      onChangeText={onChangeText}
-      keyboardType={keyboardType}
-      multiline={multiline}
+      className={`bg-gray-100 rounded-xl p-4 text-black border border-gray-200 ${multiline ? 'h-36' : ''}`}
+      placeholder={placeholder} placeholderTextColor="#9CA3AF" value={value}
+      onChangeText={onChangeText} keyboardType={keyboardType} multiline={multiline}
       textAlignVertical={multiline ? 'top' : 'center'}
     />
   </View>
 );
 
-// A custom selection component using TouchableOpacity buttons
 const SelectionField = ({ label, options, selectedValue, onSelect }) => (
   <View className="mb-4">
     <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
     <View className="flex-row flex-wrap gap-2">
       {options.map((option) => (
-        <TouchableOpacity
-          key={option}
-          onPress={() => onSelect(option)}
-          className={`px-4 py-2 rounded-full border ${
-            selectedValue === option
-              ? 'bg-colorA border-colorB'
-              : 'bg-gray-100 border-gray-200'
-          }`}
-        >
-          <Text
-            className={`font-medium ${
-              selectedValue === option ? 'text-white' : 'text-gray-700'
-            }`}
-          >
-            {option}
-          </Text>
+        <TouchableOpacity key={option} onPress={() => onSelect(option)} className={`px-4 py-2 rounded-full border ${selectedValue === option ? 'bg-blue-600 border-blue-600' : 'bg-gray-100 border-gray-200'}`}>
+          <Text className={`font-medium ${selectedValue === option ? 'text-white' : 'text-gray-700'}`}>{option}</Text>
         </TouchableOpacity>
       ))}
     </View>
   </View>
 );
 
+const DynamicListField = ({ label, placeholder, items, onAddItem, onRemoveItem, setItem, item }) => (
+  <View className="mb-4">
+    <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
+    <View className="flex-row gap-2 items-center mb-2">
+      <TextInput className="flex-1 bg-gray-100 rounded-xl p-4 text-black border border-gray-200" placeholder={placeholder} value={item} onChangeText={setItem} />
+      <TouchableOpacity onPress={onAddItem} className="bg-blue-500 p-3 rounded-full h-14 w-14 justify-center items-center">
+        <Ionicons name="add" size={28} color="white" />
+      </TouchableOpacity>
+    </View>
+    <View className="flex-row flex-wrap gap-2">
+      {items.map((val, index) => (
+        <View key={index} className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full">
+          <Text className="text-blue-800">{val}</Text>
+          <TouchableOpacity onPress={() => onRemoveItem(index)} className="ml-2">
+            <Ionicons name="close-circle" size={18} color="red" />
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  </View>
+);
+
+// Main Component
 export default function CreateTuition() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // State for all form fields based on your schema
   const [formData, setFormData] = useState({
     tutorName: '',
-    instituteName: '',
+    institute: { name: '', operationalDatesTimes: '' },
     classType: '',
-    subjectStream: '',
-    subject: '',
+    subjectStream: [],
+    subject: [],
     teachingMode: '',
     feeRange: '',
-    languageMedium: '',
-    location: '', // Changed to string to match backend expectation
+    languageMedium: [],
+    location: '',
+    contactInfo: { phone: '', email: '', socialMedia: '' },
+    daysTimes: '',
+    images: [],
     description: '',
-    contactInfo: {
-      phone: '',
-      email: '',
-    },
-    daysTimes: [],
-    images: [], // Will store base64 strings
+    nextUpdateDate: '',
+    reviews: '',
+    classDuration: '',
+    tutorQualifications: '',
+    enrollmentProcess: '',
+    maxStudents: '',
+    availabilityStatus: '',
   });
 
-  // State for the temporary day/time slot entry
-  const [timeSlot, setTimeSlot] = useState({ day: '', time: '' });
+  const [tempItem, setTempItem] = useState({ stream: '', subject: '', language: '' });
 
   const handleChange = (name, value) => {
-    // Handle nested contactInfo state
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: { ...prev[parent], [child]: value },
-      }));
+      setFormData(prev => ({ ...prev, [parent]: { ...prev[parent], [child]: value } }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleAddTimeSlot = () => {
-    if (timeSlot.day && timeSlot.time) {
-      setFormData(prev => ({
-        ...prev,
-        daysTimes: [...prev.daysTimes, timeSlot],
-      }));
-      setTimeSlot({ day: '', time: '' }); // Reset for next entry
-    } else {
-      Alert.alert('Incomplete', 'Please provide both day and time.');
+  const handleAddItem = (listName, item) => {
+    if (item.trim()) {
+      setFormData(prev => ({ ...prev, [listName]: [...prev[listName], item.trim()] }));
+      return true;
     }
+    return false;
   };
 
-  const handleRemoveTimeSlot = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      daysTimes: prev.daysTimes.filter((_, i) => i !== index),
-    }));
+  const handleRemoveItem = (listName, index) => {
+    setFormData(prev => ({ ...prev, [listName]: prev[listName].filter((_, i) => i !== index) }));
   };
 
   const pickImages = async () => {
     try {
-      // FIX: Use the correct API based on available options
-      let mediaTypes;
-      if (ImagePicker.MediaTypeOptions) {
-        // Older API
-        mediaTypes = ImagePicker.MediaTypeOptions.Images;
-      } else {
-        // Newer API - use MediaType instead
-        mediaTypes = ImagePicker.MediaType.Images;
-      }
-      
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes,
-        allowsMultipleSelection: true, // Allow multiple images
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
         quality: 0.7,
       });
-
       if (!result.canceled && result.assets) {
-        setLoading(true); // Show loader while processing images
+        setLoading(true);
         const processedImages = [];
         for (const asset of result.assets) {
           const compressed = await ImageManipulator.manipulateAsync(
@@ -167,52 +142,47 @@ export default function CreateTuition() {
   };
 
   const removeImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
+    setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
-  
+
   const validateForm = () => {
-    const requiredFields = ['tutorName', 'classType', 'subjectStream', 'subject', 'teachingMode', 'feeRange', 'languageMedium', 'location'];
-    for (const field of requiredFields) {
-        if (!formData[field]) {
-            setError(`'${field}' is a required field.`);
-            return false;
-        }
+    if (!formData.tutorName.trim()) {
+      setError('Tutor name is required.');
+      return false;
     }
-    if (!formData.contactInfo.phone) {
-        setError('Phone number is required.');
-        return false;
+    if (!formData.classType) {
+      setError('Class type is required.');
+      return false;
     }
-    setError('');
+    if (!formData.teachingMode) {
+      setError('Teaching mode is required.');
+      return false;
+    }
+    if (!formData.location.trim()) {
+      setError('Location is required.');
+      return false;
+    }
+    if (!formData.contactInfo.phone.trim()) {
+      setError('Phone number is required.');
+      return false;
+    }
     return true;
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
     setLoading(true);
-    
+    const submissionData = {
+      ...formData,
+      maxStudents: formData.maxStudents ? parseInt(formData.maxStudents) : 1,
+    };
     try {
-      // IMPORTANT: Replace with your network IP address, not localhost.
-      const API_URL = 'https://locato-backend-wxjj.onrender.com/api/dashboard/';
-      
-      // FIX: Send location as a string instead of object
-      const response = await axios.post(API_URL, formData);
-      
-      if (response.status === 201) {
-        Alert.alert('Success!', 'Your tuition listing has been created.');
-        // Safe navigation back
-        if (router.canGoBack()) {
-          router.back();
-        } else {
-          router.replace('/'); // Fallback to home if no back stack
-        }
-      }
+      const API_URL = 'https://locato-backend-wxjj.onrender.com/api/tuition';
+      await axios.post(API_URL, submissionData);
+      Alert.alert('Success!', 'Tuition listing has been created.');
+      router.back();
     } catch (err) {
-      console.error('Submission Error:', err.response?.data || err.message);
-      setError(err.response?.data?.message || 'An unexpected error occurred.');
+      setError(err.response?.data?.message || 'An error occurred.');
     } finally {
       setLoading(false);
     }
@@ -220,112 +190,73 @@ export default function CreateTuition() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerClassName="p-6">
-          {/* Header */}
           <View className="flex-row items-center mb-6">
-            <TouchableOpacity 
-              onPress={() => {
-                if (router.canGoBack()) {
-                  router.back();
-                } else {
-                  router.replace('/');
-                }
-              }} 
-              className="p-2 -ml-2"
-            >
+            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
               <Ionicons name="arrow-back" size={28} color="#1F2937" />
             </TouchableOpacity>
-            <Text className="text-3xl font-bold text-gray-800 ml-2">Create Tuition Listing</Text>
+            <Text className="text-3xl font-bold text-gray-800 ml-2">Add New Tuition</Text>
           </View>
+          {error && <View className="bg-red-100 p-3 rounded-lg mb-4 border border-red-200">
+            <Text className="text-red-700 text-center">{error}</Text>
+          </View>}
 
-          {error && (
-            <View className="bg-red-100 p-3 rounded-lg mb-4 border border-red-200">
-              <Text className="text-red-700 text-center">{error}</Text>
-            </View>
-          )}
-
-          {/* Form Sections */}
           <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <Text className="text-xl font-semibold text-gray-700 mb-4">Basic Information</Text>
             <FormField label="Tutor Name" placeholder="e.g., John Doe" value={formData.tutorName} onChangeText={v => handleChange('tutorName', v)} />
-            <FormField label="Institute Name (Optional)" placeholder="e.g., Premier Education" value={formData.instituteName} onChangeText={v => handleChange('instituteName', v)} />
-            <FormField label="Location" placeholder="e.g., Colombo 5" value={formData.location} onChangeText={v => handleChange('location', v)} />
+            <FormField label="Institute Name" placeholder="e.g., Bright Minds Academy" value={formData.institute.name} onChangeText={v => handleChange('institute.name', v)} />
+            <FormField label="Institute Operational Dates & Times" placeholder="e.g., Mon-Fri 9AM-5PM" value={formData.institute.operationalDatesTimes} onChangeText={v => handleChange('institute.operationalDatesTimes', v)} />
+            <SelectionField label="Class Type" options={['Group', 'Individual', 'Hybrid']} selectedValue={formData.classType} onSelect={v => handleChange('classType', v)} />
+            <FormField label="Location" placeholder="e.g., Colombo 6" value={formData.location} onChangeText={v => handleChange('location', v)} />
+            <FormField label="Description" multiline={true} placeholder="e.g., Expert tuition for O/L and A/L students" value={formData.description} onChangeText={v => handleChange('description', v)} />
           </View>
-          
-          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-             <Text className="text-xl font-semibold text-gray-700 mb-4">Class Details</Text>
-            <SelectionField label="Subject Stream" options={['Science', 'Commerce', 'Arts', 'Other']} selectedValue={formData.subjectStream} onSelect={v => handleChange('subjectStream', v)} />
-            <FormField label="Subject" placeholder="e.g., Combined Mathematics" value={formData.subject} onChangeText={v => handleChange('subject', v)} />
-            <SelectionField label="Class Type" options={['Group', 'Individual']} selectedValue={formData.classType} onSelect={v => handleChange('classType', v)} />
-            <SelectionField label="Teaching Mode" options={['Online', 'Physical', 'Hybrid']} selectedValue={formData.teachingMode} onSelect={v => handleChange('teachingMode', v)} />
-            <SelectionField label="Language Medium" options={['English', 'Sinhala', 'Tamil', 'Bilingual']} selectedValue={formData.languageMedium} onSelect={v => handleChange('languageMedium', v)} />
-            <FormField label="Fee Range" placeholder="e.g., 2000-4000 LKR" value={formData.feeRange} onChangeText={v => handleChange('feeRange', v)} />
-          </View>
-          
-          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-            <Text className="text-xl font-semibold text-gray-700 mb-4">Schedule</Text>
-            <View className="flex-row gap-3 items-end">
-                <View className="flex-1">
-                    <Text className="text-gray-600 mb-2 font-medium">Day</Text>
-                    <TextInput className="bg-gray-100 rounded-xl p-4 text-black border border-gray-200" placeholder="e.g., Monday" value={timeSlot.day} onChangeText={v => setTimeSlot({...timeSlot, day: v})} />
-                </View>
-                <View className="flex-1">
-                    <Text className="text-gray-600 mb-2 font-medium">Time</Text>
-                    <TextInput className="bg-gray-100 rounded-xl p-4 text-black border border-gray-200" placeholder="e.g., 5PM - 7PM" value={timeSlot.time} onChangeText={v => setTimeSlot({...timeSlot, time: v})} />
-                </View>
-                <TouchableOpacity onPress={handleAddTimeSlot} className="bg-colorA p-3 rounded-full h-14 w-14 justify-center items-center">
-                    <Ionicons name="add" size={28} color="white" />
-                </TouchableOpacity>
-            </View>
-            <View className="mt-4">
-                {formData.daysTimes.map((item, index) => (
-                    <View key={index} className="flex-row justify-between items-center bg-blue-50 p-3 rounded-lg mb-2">
-                        <Text className="font-semibold text-blue-800">{item.day}: <Text className="font-normal">{item.time}</Text></Text>
-                        <TouchableOpacity onPress={() => handleRemoveTimeSlot(index)}>
-                            <Ionicons name="trash-outline" size={20} color="red" />
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </View>
-          </View>
-          
-          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-            <Text className="text-xl font-semibold text-gray-700 mb-4">Contact & Media</Text>
-            <FormField label="Contact Phone" placeholder="Enter phone number" value={formData.contactInfo.phone} onChangeText={v => handleChange('contactInfo.phone', v)} keyboardType="phone-pad" />
-            <FormField label="Contact Email (Optional)" placeholder="Enter email address" value={formData.contactInfo.email} onChangeText={v => handleChange('contactInfo.email', v)} keyboardType="email-address" />
-            <FormField label="Description (Optional)" placeholder="Add a description about your class..." value={formData.description} onChangeText={v => handleChange('description', v)} multiline={true} />
 
-            <Text className="text-gray-600 mb-2 font-medium">Flyers or Images</Text>
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Tuition Details</Text>
+            <DynamicListField label="Subject Stream" placeholder="e.g., Science" items={formData.subjectStream} item={tempItem.stream} setItem={v => setTempItem(p => ({ ...p, stream: v }))} onAddItem={() => { if (handleAddItem('subjectStream', tempItem.stream)) setTempItem(p => ({ ...p, stream: '' })); }} onRemoveItem={(i) => handleRemoveItem('subjectStream', i)} />
+            <DynamicListField label="Subjects" placeholder="e.g., Mathematics" items={formData.subject} item={tempItem.subject} setItem={v => setTempItem(p => ({ ...p, subject: v }))} onAddItem={() => { if (handleAddItem('subject', tempItem.subject)) setTempItem(p => ({ ...p, subject: '' })); }} onRemoveItem={(i) => handleRemoveItem('subject', i)} />
+            <DynamicListField label="Language Medium" placeholder="e.g., English" items={formData.languageMedium} item={tempItem.language} setItem={v => setTempItem(p => ({ ...p, language: v }))} onAddItem={() => { if (handleAddItem('languageMedium', tempItem.language)) setTempItem(p => ({ ...p, language: '' })); }} onRemoveItem={(i) => handleRemoveItem('languageMedium', i)} />
+            <SelectionField label="Teaching Mode" options={['Online', 'In-Person', 'Hybrid']} selectedValue={formData.teachingMode} onSelect={v => handleChange('teachingMode', v)} />
+            <FormField label="Fee Range" placeholder="e.g., LKR 1000-2000 per session" value={formData.feeRange} onChangeText={v => handleChange('feeRange', v)} />
+            <FormField label="Class Duration" placeholder="e.g., 1 hour" value={formData.classDuration} onChangeText={v => handleChange('classDuration', v)} />
+            <FormField label="Maximum Students" placeholder="e.g., 20" value={formData.maxStudents} onChangeText={v => handleChange('maxStudents', v)} keyboardType="numeric" />
+          </View>
+
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Operations & Contact</Text>
+            <FormField label="Class Days & Times" placeholder="e.g., Mon, Wed, Fri 4PM-6PM" value={formData.daysTimes} onChangeText={v => handleChange('daysTimes', v)} />
+            <FormField label="Contact Phone" placeholder="Enter phone number" value={formData.contactInfo.phone} onChangeText={v => handleChange('contactInfo.phone', v)} keyboardType="phone-pad" />
+            <FormField label="Contact Email" placeholder="e.g., contact@brightminds.lk" value={formData.contactInfo.email} onChangeText={v => handleChange('contactInfo.email', v)} keyboardType="email-address" />
+            <FormField label="Social Media" placeholder="e.g., facebook.com/brightminds" value={formData.contactInfo.socialMedia} onChangeText={v => handleChange('contactInfo.socialMedia', v)} />
+            <FormField label="Enrollment Process" multiline={true} placeholder="e.g., Contact via phone or online form" value={formData.enrollmentProcess} onChangeText={v => handleChange('enrollmentProcess', v)} />
+            <FormField label="Availability Status" placeholder="e.g., Open for Enrollment" value={formData.availabilityStatus} onChangeText={v => handleChange('availabilityStatus', v)} />
+          </View>
+
+          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Additional Details</Text>
+            <FormField label="Tutor Qualifications" multiline={true} placeholder="e.g., BSc in Mathematics" value={formData.tutorQualifications} onChangeText={v => handleChange('tutorQualifications', v)} />
+            <FormField label="Reviews" multiline={true} placeholder="e.g., 4.5/5 based on 20 reviews" value={formData.reviews} onChangeText={v => handleChange('reviews', v)} />
+            <FormField label="Next Update Date" placeholder="YYYY-MM-DD" value={formData.nextUpdateDate} onChangeText={v => handleChange('nextUpdateDate', v)} />
+            <Text className="text-gray-600 mb-2 font-medium">Images</Text>
             <TouchableOpacity onPress={pickImages} className="border-2 border-dashed border-gray-300 rounded-xl p-6 items-center justify-center bg-gray-50 mb-4">
-                <Ionicons name="cloud-upload-outline" size={40} color="gray" />
-                <Text className="text-gray-500 mt-2">Tap to upload images</Text>
+              <Ionicons name="cloud-upload-outline" size={40} color="gray" />
+              <Text className="text-gray-500 mt-2">Tap to upload images</Text>
             </TouchableOpacity>
-             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {formData.images.map((base64Uri, index) => (
-                    <View key={index} className="relative mr-3">
-                        <Image source={{ uri: base64Uri }} className="w-24 h-24 rounded-lg" />
-                        <TouchableOpacity onPress={() => removeImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
-                            <Ionicons name="close" size={16} color="white" />
-                        </TouchableOpacity>
-                    </View>
-                ))}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {formData.images.map((uri, index) => (
+                <View key={index} className="relative mr-3">
+                  <Image source={{ uri }} className="w-24 h-24 rounded-lg" />
+                  <TouchableOpacity onPress={() => removeImage(index)} className="absolute -top-2 -right-2 bg-red-500 rounded-full p-1">
+                    <Ionicons name="close" size={16} color="white" />
+                  </TouchableOpacity>
+                </View>
+              ))}
             </ScrollView>
           </View>
 
-          <TouchableOpacity
-            onPress={handleSubmit}
-            disabled={loading}
-            className="bg-colorA w-full rounded-xl py-4 items-center mt-4"
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text className="text-white font-bold text-lg">Create Listing</Text>
-            )}
+          <TouchableOpacity onPress={handleSubmit} disabled={loading} className="bg-blue-600 w-full rounded-xl py-4 items-center mt-4">
+            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text className="text-white font-bold text-lg">Create Tuition Listing</Text>}
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
