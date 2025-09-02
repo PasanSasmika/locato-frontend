@@ -30,7 +30,7 @@ export default function Login() {
       router.replace('/(serviceDashboards)/TuitionDashboard');
     } else if (userType === 'Home Repair') {
       router.replace('/(serviceDashboards)/HomeRepairDashboard');
-    } else if (userType === 'Supermarkets') {
+    } else if (userType === 'Supermarket') {
       router.replace('/(serviceDashboards)/SupermarketsDashboard');
     } else if (userType === 'Electronics') {
       router.replace('/(serviceDashboards)/ElectronicsDashboard');
