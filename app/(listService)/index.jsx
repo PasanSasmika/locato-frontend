@@ -5,7 +5,7 @@ import {
   ScrollView, 
   TouchableOpacity, 
   SafeAreaView, 
-  ActivityIndicator // Changed from UIActivityIndicator
+  ActivityIndicator 
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -24,9 +24,9 @@ export default function ServiceCat() {
           id: categoryDoc._id,
           sectionTitle: categoryDoc.Category,
           categories: categoryDoc.subCategories.map((subCat, subIndex) => ({
-            id: `${categoryDoc._id}-${subIndex}`,
-            category: subCat,
-            type: subCat.toLowerCase().replace(/\s+/g, '-'),
+            id: `${categoryDoc._id}-${subCat._id || subIndex}`, // Use subCat._id if available, fallback to index
+            category: subCat.name, // Use subCat.name
+            type: subCat.name.toLowerCase().replace(/\s+/g, '-'), // Use subCat.name for type
           })),
         }));
         setCategories(transformedData);
@@ -54,14 +54,12 @@ export default function ServiceCat() {
   const renderCategoryCard = (item) => (
     <TouchableOpacity
       key={item.id}
-      // Updated card style to match theme (light gray, more padding, rounded)
       className="bg-gray-100 w-[48%] rounded-2xl p-4 mb-4 flex-row justify-between items-center"
       onPress={() => handleCategoryPress(item)}
     >
       <Text className="text-black text-base font-semibold w-[80%]">
         {item.category}
       </Text>
-      {/* Updated icon style for a cleaner look */}
       <View className="bg-white p-1 rounded-full">
         <Ionicons name="chevron-forward-outline" size={20} color="#f2eb58" />
       </View>
@@ -70,7 +68,6 @@ export default function ServiceCat() {
 
   const renderSection = (section) => (
     <View key={section.id} className="mb-6">
-      {/* Updated section title style */}
       <Text className="text-xl font-bold text-black mb-4">
         {section.sectionTitle}
       </Text>
@@ -82,7 +79,6 @@ export default function ServiceCat() {
 
   if (loading) {
     return (
-      // Themed loading indicator
       <SafeAreaView className="flex-1 justify-center items-center bg-white">
         <ActivityIndicator size="large" color="#000000" />
       </SafeAreaView>
@@ -91,7 +87,6 @@ export default function ServiceCat() {
 
   if (error) {
     return (
-      // Themed error message
       <SafeAreaView className="flex-1 justify-center items-center bg-white p-6">
         <Text className="text-gray-600 text-center">
           Failed to load categories. Please try again later.
@@ -101,28 +96,24 @@ export default function ServiceCat() {
   }
 
   return (
-    // Main container now uses SafeAreaView for consistency
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView
-        contentContainerClassName="p-6" // Consistent padding
+        contentContainerClassName="p-6"
         showsVerticalScrollIndicator={false}
       >
-        {/* --- Header --- */}
         <View className="flex-row items-center mb-8">
-            <TouchableOpacity onPress={() => router.back()} className="mr-4">
-              <Ionicons name="arrow-back" size={28} color="black" />
-            </TouchableOpacity>
-            <View>
-              <Text className="text-3xl font-bold text-black">
-                  Pick a Category
-              </Text>
-              <Text className="text-base text-gray-500 mt-1">
-                  Choose a service to get starteddfdsfs
-              </Text>
-            </View>
+          <TouchableOpacity onPress={() => router.back()} className="mr-4">
+            <Ionicons name="arrow-back" size={28} color="black" />
+          </TouchableOpacity>
+          <View>
+            <Text className="text-3xl font-bold text-black">
+              Pick a Category
+            </Text>
+            <Text className="text-base text-gray-500 mt-1">
+              Choose a service to get started
+            </Text>
+          </View>
         </View>
-
-        {/* --- Categories List --- */}
         {categories.map(renderSection)}
       </ScrollView>
     </SafeAreaView>
