@@ -159,6 +159,10 @@ export default function ServiceAll() {
           {renderInfoRow("alert-circle-outline", "24/7 Emergency", item.emergency247 ? "Available" : "Not Available")}
           {renderInfoRow("call-outline", "Contact", item.contactNo)}
           {renderInfoRow("location-outline", "Location", item.location)}
+          {renderInfoRow("time-outline", "Visiting Hours", item.visitingHours)}
+          {renderInfoRow("earth-outline", "Web Site", item.website)}
+          {renderInfoRow("add-circle-outline", "Ambulance No", item.ambulanceNo)}
+          {renderInfoRow("time-outline", "Last Update", item.updatedAt.split("T")[0])}
         </View>
       </View>
     </View>
@@ -189,7 +193,9 @@ export default function ServiceAll() {
           {renderInfoRow("home-outline", "Home Collection", item.homeSampleCollection ? "Available" : "Not Available")}
           {renderInfoRow("time-outline", "Open Hours", item.openHours)}
           {renderInfoRow("call-outline", "Contact", item.contactNo)}
+          {renderInfoRow("earth-outline", "Web Site", item.website)}
           {renderInfoRow("location-outline", "Location", item.location)}
+
         </View>
       </View>
     </View>
@@ -221,6 +227,8 @@ export default function ServiceAll() {
           {renderInfoRow("car-outline", "Delivery", item.deliveryAvailable ? "Available" : "Not Available")}
           {renderInfoRow("call-outline", "Contact", item.contactNo)}
           {renderInfoRow("location-outline", "Location", item.location)}
+          {renderInfoRow("time-outline", "Last Update", item.updatedAt.split("T")[0])}
+
         </View>
       </View>
     </View>
@@ -250,6 +258,10 @@ export default function ServiceAll() {
           {renderInfoRow("restaurant-outline", "Cuisine", item.cuisineTypes?.join(", "))}
           {renderInfoRow("menu-outline", "Menu Highlights", item.menuHighlights)}
           {renderInfoRow("cash-outline", "Price Range", item.priceRange)}
+          {renderInfoRow("cash-outline", "Delivary Portals", item.deliveryPortals)}
+          {renderInfoRow("call-outline", "Phone", item.contactInfo.phone)}
+      {renderInfoRow("mail-outline", "Email", item.contactInfo.email)}
+                {renderInfoRow("time-outline", "Open Hours", item.openingHours)}
           {renderInfoRow("location-outline", "Location", item.location)}
         </View>
       </View>
@@ -267,7 +279,14 @@ export default function ServiceAll() {
       {renderInfoRow("people-outline", "Gender Served", item.genderServed)}
       {renderInfoRow("cut-outline", "Services", item.services?.join(", "))}
       {renderInfoRow("cash-outline", "Price List", item.priceList)}
+      {renderInfoRow("time-outline", "Working Days", item.workingDays)}
+      {renderInfoRow("bookmark-outline", "Appoinments Need", item.appointmentNeeded ? "Yes" : "No")}
+      {renderInfoRow("call-outline", "Phone", item.contactInfo.phone)}
+      {renderInfoRow("earth-outline", "Social Media", item.contactInfo.socialMedia)}
       {renderInfoRow("location-outline", "Location", item.location)}
+
+      {renderInfoRow("time-outline", "Last Update", item.updatedAt.split("T")[0])}
+
     </View>
   )
 
@@ -295,8 +314,11 @@ export default function ServiceAll() {
         <Text className="text-gray-600 ml-1 text-sm">4.8 ★ 98 Reviews</Text>
       </View>
       {renderInfoRow("storefront-outline", "Store Type", item.storeType)}
+      {renderInfoRow("card-outline", "Payment Method", item.paymentMethods)}
       {renderInfoRow("time-outline", "Open Now", item.isOpenNow ? "Yes" : "No")}
-      {renderInfoRow("car-outline", "Delivery", item.deliveryAvailable ? "Yes" : "No")}
+      {renderInfoRow("bicycle-outline", "Delivery", item.deliveryAvailable ? "Yes" : "No")}
+      {renderInfoRow("car-outline", "Parking", item.parkingAvailable ? "Yes" : "No")}
+      {renderInfoRow("time-outline", "24/7 Open", item.is24HourOpen ? "Yes" : "No")}
       {renderInfoRow("location-outline", "Location", item.location)}
     </View>
   )
@@ -312,6 +334,9 @@ export default function ServiceAll() {
       {renderInfoRow("leaf-outline", "Service Info", item.serviceInfo)}
       {renderInfoRow("location-outline", "Location", item.location)}
       {renderInfoRow("call-outline", "Phone", item.contactInfo?.phone)}
+      {renderInfoRow("time-outline", "Opeaning Hours", item.openingHours)}
+      {renderInfoRow("calendar-outline", "Last Update", item.updatedAt.split("T")[0])}
+
     </View>
   )
 
@@ -338,8 +363,14 @@ export default function ServiceAll() {
         <Text className="text-gray-600 ml-1 text-sm">4.8 ★ 98 Reviews</Text>
       </View>
       {renderInfoRow("shirt-outline", "Type", item.type)}
+      {renderInfoRow("planet-outline", "Style", item.style)}
+      {renderInfoRow("cash-outline", "Price Ranges", item.priceRanges)}
+      {renderInfoRow("trending-down-outline", "Offers", item.offers)}
+      {renderInfoRow("time-outline", "Open Hours", item.openHours)}
       {renderInfoRow("location-outline", "Location", item.location)}
       {renderInfoRow("call-outline", "Phone", item.contactInfo?.phone)}
+      {renderInfoRow("mail-outline", "Email", item.contactInfo?.email)}
+      {renderInfoRow("chevron-collapse-outline", "Return Policy", item.returnPolicy)}
     </View>
   )
 
@@ -358,17 +389,27 @@ export default function ServiceAll() {
   )
 
   const renderElectronics = (item) => (
-    <View className="bg-white rounded-xl p-5 mb-5 shadow-lg border border-gray-200">
-      {renderImageCarousel(item.photos, "photos")}
-      <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">{item.name}</Text>
-      <View className="flex-row items-center mb-2">
-        <Ionicons name="star" size={16} color="#6b7280" />
-        <Text className="text-gray-600 ml-1 text-sm">4.8 ★ 98 Reviews</Text>
-      </View>
-      {renderInfoRow("phone-portrait-outline", "Products Sold", item.productsSold?.join(", "))}
-      {renderInfoRow("location-outline", "Location", item.location)}
-      {renderInfoRow("call-outline", "Phone", item.contactInfo?.phone)}
+  <View className="bg-white rounded-xl p-5 mb-5 shadow-lg border border-gray-200">
+    {renderImageCarousel(item.photos, "photos")}
+    <Text className="text-xl font-bold text-gray-800 mt-4 mb-2">{item.name}</Text>
+    <View className="flex-row items-center mb-2">
+      <Ionicons name="star" size={16} color="#6b7280" />
+      <Text className="text-gray-600 ml-1 text-sm">4.8 ★ 98 Reviews</Text>
     </View>
+    {renderInfoRow("phone-portrait-outline", "Products Sold", item.productsSold?.join(", "))}
+    {renderInfoRow("location-outline", "Location", item.location)}
+    {renderInfoRow("call-outline", "Phone", item.contactInfo?.phone)}
+    {renderInfoRow("book-outline", "Warrenty Info", item.warrantyInfo)}
+    {renderInfoRow("file-tray-full-outline", "Brand", item.brandPurchases?.join(", "))}
+    {renderInfoRow("cash-outline", "Price Range", item.priceRange)}
+    {renderInfoRow("cube-outline", "Services Offered", item.servicesOffered?.join(", "))}
+    {renderInfoRow("time-outline", "Opening Hours", item.contactInfo?.openingHours)}
+    {renderInfoRow("truck-outline", "Delivery Options", item.deliveryOptions)}
+    {renderInfoRow("build-outline", "Repair Services", item.repairServices ? 'Available' : 'Not Available')}
+    {renderInfoRow("headset-outline", "Customer Support", item.customerSupportAvailability)}
+    {renderInfoRow("star-outline", "Rating", item.rating)}
+    {renderInfoRow("bag-handle-outline", "Online Shopping", item.onlineShopping ? 'Available' : 'Not Available')}
+  </View>
   )
 
   const renderGym = (item) => (
@@ -395,6 +436,10 @@ export default function ServiceAll() {
       </View>
       {renderInfoRow("construct-outline", "Categories", item.categories?.join(", "))}
       {renderInfoRow("location-outline", "Location", item.location)}
+      {renderInfoRow("location-outline", "Location", item.stockStatus)}
+      {renderInfoRow("location-outline", "Openning Hours", item.openingHours)}
+      {renderInfoRow("location-outline", "Location", item.priceInfo)}
+      {renderInfoRow("bicycle-outline", "Delivary Info", item.deliveryInfo)}   
       {renderInfoRow("call-outline", "Phone", item.contactInfo?.phone)}
     </View>
   )
