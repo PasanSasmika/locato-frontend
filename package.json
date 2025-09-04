@@ -42,8 +42,10 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.2",
+    "react-native-animatable": "^1.4.0",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-indicators": "^0.17.0",
+    "react-native-maps": "1.20.1",
     "react-native-reanimated": "^3.16.2",
     "react-native-safe-area-context": "^5.4.0",
     "react-native-screens": "~4.10.0",
@@ -51,8 +53,7 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.5",
-    "react-native-maps": "1.20.1"
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
