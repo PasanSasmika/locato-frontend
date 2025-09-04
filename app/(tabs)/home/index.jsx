@@ -1,3 +1,4 @@
+// Updated (tabs)/home/index.jsx
 import { View, Text, SafeAreaView, Image, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useAuthStore } from '../../../store/authStore';
 import { Ionicons } from '@expo/vector-icons';
@@ -53,10 +54,12 @@ export default function Home() {
     // Add your navigation or action logic here
   };
 
-  // Handle "View all services" button click (placeholder function)
-  const handleViewAllServices = (category) => {
-    console.log('View all services for:', category.Category);
-    // Add your navigation or action logic here
+  // Handle "View all services" button click
+  const handleViewAllServices = (subCategory) => {
+    router.push({
+      pathname: '/home/serviceAll',
+      params: { serviceType: subCategory.name },
+    });
   };
 
   return (
@@ -121,44 +124,44 @@ export default function Home() {
         </View>
 
         {/* Select Plan Section */}
-    <Text className="text-lg font-semibold mb-4">Select plan</Text>
-<View className="mb-6">
-  {loading ? (
-    <ActivityIndicator size="large" color="#10b981" />
-  ) : plans.length > 0 ? (
-    plans.map((plan, index) => (
-      <View key={index} className="mb-6">
-        {/* Category Header */}
-        <Text className="text-base font-bold text-gray-800 mb-3">{plan.Category}</Text>
-        {/* Subcategories in enhanced cards */}
-        {plan.subCategories.map((sub, subIndex) => (
-          <TouchableOpacity
-            key={subIndex}
-            className="w-full bg-gray-100 rounded-lg p-4 mb-3 shadow-md"
-            onPress={() => handleSubCategoryClick(sub)}
-          >
-            <View className="flex-row items-center mb-2">
-              <Ionicons name={sub.icon || 'list'} size={20} color="#10b981" />
-              <Text className="text-sm font-medium text-gray-700 ml-2">{sub.name}</Text>
-            </View>
-            {sub.description && (
-              <Text className="text-xs text-gray-500 mb-3">{sub.description}</Text>
-            )}
-            <TouchableOpacity
-              className="flex-row items-center bg-[#10b981] rounded-full px-4 py-2 w-auto self-end"
-              onPress={() => handleViewAllServices(plan)}
-            >
-              <Text className="text-sm text-white ml-2">View all services</Text>
-              <Ionicons name="chevron-forward" size={16} color="white" className="ml-2" />
-            </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
-      </View>
-    ))
-  ) : (
-    <Text className="text-gray-400">No plans available</Text>
-  )}
-</View>
+        <Text className="text-lg font-semibold mb-4">Select plan</Text>
+        <View className="mb-6">
+          {loading ? (
+            <ActivityIndicator size="large" color="#10b981" />
+          ) : plans.length > 0 ? (
+            plans.map((plan, index) => (
+              <View key={index} className="mb-6">
+                {/* Category Header */}
+                <Text className="text-base font-bold text-gray-800 mb-3">{plan.Category}</Text>
+                {/* Subcategories in enhanced cards */}
+                {plan.subCategories.map((sub, subIndex) => (
+                  <TouchableOpacity
+                    key={subIndex}
+                    className="w-full bg-gray-100 rounded-lg p-4 mb-3 shadow-md"
+                    onPress={() => handleSubCategoryClick(sub)}
+                  >
+                    <View className="flex-row items-center mb-2">
+                      <Ionicons name={sub.icon || 'list'} size={20} color="#10b981" />
+                      <Text className="text-sm font-medium text-gray-700 ml-2">{sub.name}</Text>
+                    </View>
+                    {sub.description && (
+                      <Text className="text-xs text-gray-500 mb-3">{sub.description}</Text>
+                    )}
+                    <TouchableOpacity
+                      className="flex-row items-center bg-[#10b981] rounded-full px-4 py-2 w-auto self-end"
+                      onPress={() => handleViewAllServices(sub)}
+                    >
+                      <Text className="text-sm text-white ml-2">View all services</Text>
+                      <Ionicons name="chevron-forward" size={16} color="white" className="ml-2" />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ))
+          ) : (
+            <Text className="text-gray-400">No plans available</Text>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
