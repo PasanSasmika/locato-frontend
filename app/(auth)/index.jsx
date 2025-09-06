@@ -25,7 +25,7 @@ export default function Login() {
     // IMPORTANT: The text must match exactly (e.g., 'Tuition' is not the same as 'tuition').
 
     if (userType === 'customer') {
-      router.replace('/(tabs)/home');
+      router.replace('/(tabs)/home/');
     } else if (userType === 'Tuition') {
       router.replace('/(serviceDashboards)/TuitionDashboard');
     } else if (userType === 'Home Repair') {
