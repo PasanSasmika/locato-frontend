@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -86,7 +86,7 @@ export default function ServiceApplication() {
           { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
         );
         const base64 = await FileSystem.readAsStringAsync(compressedImage.uri, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: 'base64',
         });
         setImage({
           uri: compressedImage.uri,

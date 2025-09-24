@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker'; // Corrected import
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -99,7 +99,7 @@ export default function CreateDoctor() {
           const compressed = await ImageManipulator.manipulateAsync(
             asset.uri, [{ resize: { width: 800 } }], { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
           );
-          const base64 = await FileSystem.readAsStringAsync(compressed.uri, { encoding: FileSystem.EncodingType.Base64 });
+          const base64 = await FileSystem.readAsStringAsync(compressed.uri, { encoding: 'base64', });
           processedImages.push(`data:image/jpeg;base64,${base64}`);
         }
         setFormData(prev => ({ ...prev, images: [...prev.images, ...processedImages] }));
