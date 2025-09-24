@@ -129,43 +129,44 @@ export default function CreateAyurveda() {
   };
 
   const pickImages = async () => {
-try {
-// Request permission to access media library
- const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
- if (status !== 'granted') {
- setError('Permission to access media library was denied.');
- return;
-}
+    try {
+      // Request permission to access media library
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        setError('Permission to access media library was denied.');
+        return;
+      }
 
- const result = await ImagePicker.launchImageLibraryAsync({
- mediaTypes: ImagePicker.MediaTypeOptions.Images,
- allowsMultipleSelection: true,
- quality: 0.7,
- });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.7,
+      });
 
- if (!result.canceled && result.assets) {
-setLoading(true);
- const processedImages = [];
-for (const asset of result.assets) {
- const compressed = await ImageManipulator.manipulateAsync(
- asset.uri,
-[{ resize: { width: 800 } }],
-{ compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
-);
- const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
- encoding: 'base64', // Corrected this line
- });
- processedImages.push(`data:image/jpeg;base64,${base64}`);
-}
-setFormData(prev => ({ ...prev, images: [...prev.images, ...processedImages] }));
-}   
-} catch (err) {
-console.error('Image processing error:', err);
-setError('Failed to process images. Please try again.');
- } finally {
- setLoading(false);
-}
-};
+      if (!result.canceled && result.assets) {
+        setLoading(true);
+        const processedImages = [];
+        for (const asset of result.assets) {
+          const compressed = await ImageManipulator.manipulateAsync(
+            asset.uri,
+            [{ resize: { width: 800 } }],
+            { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
+          );
+          const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
+            encoding: 'base64',
+          });
+          processedImages.push(`data:image/jpeg;base64,${base64}`);
+        }
+        setFormData(prev => ({ ...prev, images: [...prev.images, ...processedImages] }));
+      }   
+    } catch (err) {
+      console.error('Image processing error:', err);
+      setError('Failed to process images. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const removeImage = (index) => {
     setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
@@ -180,7 +181,7 @@ setError('Failed to process images. Please try again.');
           return false;
         }
       } else if (!formData[field]) {
-        setError(`Please provide ${field.charAt(0).toUpperCase() + child.slice(1)}.`);
+        setError(`Please provide ${field.charAt(0).toUpperCase() + field.slice(1)}.`);
         return false;
       }
     }
@@ -209,7 +210,7 @@ setError('Failed to process images. Please try again.');
       const response = await axios.post(API_URL, submissionData);
       if (response.status === 201) {
         Alert.alert('Success!', 'Ayurveda Centre has been created.');
-        router.back();
+        router.push('/profile/');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred while submitting.');
@@ -230,11 +231,55 @@ setError('Failed to process images. Please try again.');
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerClassName="p-6">
           <View className="flex-row items-center mb-6">
-            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+           <TouchableOpacity onPress={() => { if (router.push('/profile/')) router.push('/'); }} className="p-2 -ml-2">
               <Ionicons name="arrow-back" size={28} color="#1F2937" />
-            </TouchableOpacity>
+            </TouchableOpacity>        
             <Text className="text-3xl font-bold text-gray-800 ml-2">Add Ayurveda Centre</Text>
           </View>
+
+          {/* Enhanced Map Section */}    
+          <View className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Pin Location on Map</Text>
+            <Text className="text-gray-600 mb-4 font-medium">Tap on the map to set or update the precise location of your Ayurveda Centre. 🗺️</Text>
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: formData.coordinates.latitude,
+                  longitude: formData.coordinates.longitude,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+                onPress={handleMapPress}
+              >
+                {formData.coordinates.latitude && (
+                  <Marker
+                    coordinate={formData.coordinates}
+                    title={formData.centreName || 'New Centre Location'}
+                    pinColor="#2563EB"
+                  />
+                )}
+              </MapView>
+              <View className="absolute top-4 right-4 bg-white p-2 rounded-full shadow-md">
+                <TouchableOpacity
+                  onPress={(e) => {
+                    e.stopPropagation(); // Prevent event from bubbling to MapView
+                    // Add locate functionality if needed, currently a placeholder
+                    console.log('Locate button pressed');
+                  }}
+                >
+                  <Ionicons name="locate-outline" size={24} color="#2563EB" />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View className="flex-row items-center mt-3">
+              <Ionicons name="location-outline" size={20} color="#2563EB" />
+              <Text className="text-gray-600 ml-2 font-medium">
+                Coordinates: {formData.coordinates.latitude.toFixed(4)}, {formData.coordinates.longitude.toFixed(4)}
+              </Text>
+            </View>
+          </View>
+
           {error && (
             <View className="bg-red-100 p-3 rounded-lg mb-4 border border-red-200">
               <Text className="text-red-700 text-center">{error}</Text>
@@ -262,33 +307,6 @@ setError('Failed to process images. Please try again.');
               value={formData.serviceInfo}
               onChangeText={v => handleChange('serviceInfo', v)}
             />
-          </View>
-
-          <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
-            <Text className="text-xl font-semibold text-gray-700 mb-4">Pin Location on Map</Text>
-            <Text className="text-gray-600 mb-2 font-medium">Tap on the map to set the precise location. 🗺️</Text>
-            <View style={styles.mapContainer}>
-              <MapView
-                style={styles.map}
-                initialRegion={{
-                  latitude: formData.coordinates.latitude,
-                  longitude: formData.coordinates.longitude,
-                  latitudeDelta: 0.0922,
-                  longitudeDelta: 0.0421,
-                }}
-                onPress={handleMapPress}
-              >
-                {formData.coordinates.latitude && (
-                  <Marker
-                    coordinate={formData.coordinates}
-                    title={formData.centreName || 'New Centre Location'}
-                  />
-                )}
-              </MapView>
-            </View>
-            <Text className="text-gray-600 mt-2 font-medium">
-              Coordinates: {formData.coordinates.latitude.toFixed(4)}, {formData.coordinates.longitude.toFixed(4)}
-            </Text>
           </View>
 
           <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
@@ -470,13 +488,18 @@ setError('Failed to process images. Please try again.');
 
 const styles = StyleSheet.create({
   mapContainer: {
-    height: 300,
+    height: 400,
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: '#D1D5DB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-});
+});   
