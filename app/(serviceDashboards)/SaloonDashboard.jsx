@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, ScrollView, TouchableOpacity, Image,
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform, SafeAreaView,
+  StyleSheet
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -9,8 +10,9 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import MapView, { Marker } from 'react-native-maps';
 
-// Reusable Components (No changes needed)
+// Reusable Components
 const FormField = ({ label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false }) => (
   <View className="mb-4">
     <Text className="text-gray-600 mb-2 font-medium">{label}</Text>
@@ -63,7 +65,7 @@ export default function CreateSaloon() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   const [formData, setFormData] = useState({
     name: '',
     genderServed: '',
@@ -78,6 +80,7 @@ export default function CreateSaloon() {
     languages: [],
     images: [],
     nextUpdateDate: '',
+    coordinates: { latitude: 6.9271, longitude: 79.8612 }, // Default to Colombo
   });
 
   const [tempItem, setTempItem] = useState({ service: '', day: '', language: '', mode: '' });
@@ -89,6 +92,13 @@ export default function CreateSaloon() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleMapPress = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      coordinates: e.nativeEvent.coordinate,
+    }));
   };
 
   const handleAddItem = (listName, item) => {
@@ -120,16 +130,17 @@ export default function CreateSaloon() {
             { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
           );
           const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
-encoding: 'base64',          });
+            encoding: 'base64',
+          });
           processedImages.push(`data:image/jpeg;base64,${base64}`);
         }
         setFormData(prev => ({ ...prev, images: [...prev.images, ...processedImages] }));
-        setLoading(false);
       }
     } catch (err) {
       console.error('Image processing error:', err);
       setError('Failed to process images.');
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -138,7 +149,28 @@ encoding: 'base64',          });
   };
 
   const validateForm = () => {
-    // Placeholder validation logic (unchanged as per request)
+    const requiredFields = ['name', 'location', 'genderServed', 'contactInfo.phone'];
+    for(const field of requiredFields) {
+        if (field.includes('.')) {
+            const [parent, child] = field.split('.');
+            if(!formData[parent][child]) {
+                setError(`Please provide a ${child}.`);
+                return false;
+            }
+        } else if (!formData[field]) {
+            setError(`Please provide a ${field}.`);
+            return false;
+        }
+    }
+    if (formData.appointmentNeeded === null || formData.walkInAllowed === null) {
+        setError('Please select appointment and walk-in options.');
+        return false;
+    }
+    if (!formData.coordinates.latitude) {
+      setError('Please pin the location on the map.');
+      return false;
+    }
+    setError('');
     return true;
   };
 
@@ -154,7 +186,7 @@ encoding: 'base64',          });
       const API_URL = 'https://locato-backend-wxjj.onrender.com/api/saloons';
       await axios.post(API_URL, submissionData);
       Alert.alert('Success!', 'Saloon has been created.');
-      router.back();
+      router.push('/profile/');
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred.');
     } finally {
@@ -167,14 +199,46 @@ encoding: 'base64',          });
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerClassName="p-6">
           <View className="flex-row items-center mb-6">
-            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <TouchableOpacity onPress={() => router.push('profile/')} className="p-2 -ml-2">
               <Ionicons name="arrow-back" size={28} color="#1F2937" />
             </TouchableOpacity>
             <Text className="text-3xl font-bold text-gray-800 ml-2">Add New Saloon</Text>
           </View>
+
           {error && <View className="bg-red-100 p-3 rounded-lg mb-4 border border-red-200">
             <Text className="text-red-700 text-center">{error}</Text>
           </View>}
+
+          <View className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Pin Location on Map</Text>
+            <Text className="text-gray-600 mb-4 font-medium">Tap on the map to set the precise location. 🗺️</Text>
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: formData.coordinates.latitude,
+                  longitude: formData.coordinates.longitude,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+                onPress={handleMapPress}
+              >
+                {formData.coordinates.latitude && (
+                  <Marker
+                    coordinate={formData.coordinates}
+                    title={formData.name || 'New Saloon Location'}
+                    pinColor="#2563EB"
+                  />
+                )}
+              </MapView>
+            </View>
+            <View className="flex-row items-center mt-3">
+              <Ionicons name="location-outline" size={20} color="#2563EB" />
+              <Text className="text-gray-600 ml-2 font-medium">
+                Coordinates: {formData.coordinates.latitude.toFixed(4)}, {formData.coordinates.longitude.toFixed(4)}
+              </Text>
+            </View>
+          </View>
 
           <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <Text className="text-xl font-semibold text-gray-700 mb-4">Basic Information</Text>
@@ -228,3 +292,16 @@ encoding: 'base64',          });
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  mapContainer: {
+    height: 400,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+});
