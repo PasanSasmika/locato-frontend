@@ -1,5 +1,6 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, StyleSheet } from "react-native"; // --- ADDED StyleSheet ---
 import { Ionicons } from "@expo/vector-icons";
+import MapView, { Marker } from "react-native-maps"; // --- ADDED MapView, Marker ---
 
 export default function Pharmacy({ item, screenWidth }) {
   const renderImageCarousel = (images, photosKey = "images") => (
@@ -67,9 +68,62 @@ export default function Pharmacy({ item, screenWidth }) {
           {renderInfoRow("car-outline", "Delivery", item.deliveryAvailable ? "Available" : "Not Available")}
           {renderInfoRow("call-outline", "Contact", item.contactNo)}
           {renderInfoRow("location-outline", "Location", item.location)}
-          {renderInfoRow("time-outline", "Last Update", item.updatedAt.split("T")[0])}
+          {renderInfoRow("time-outline", "Last Update", item.updatedAt?.split("T")[0])}
         </View>
+        
+        {/* --- ADDED MAP AREA --- */}
+        {item.coordinates?.coordinates && Array.isArray(item.coordinates.coordinates) && item.coordinates.coordinates.length >= 2 && (
+          <View className="bg-white rounded-xl p-5 mb-5 shadow-lg border border-gray-200 mt-4">
+            <Text className="text-xl font-bold text-gray-800 mb-4">
+              Location on Map
+            </Text>
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: Number(item.coordinates.coordinates[1]) || 0,
+                  longitude: Number(item.coordinates.coordinates[0]) || 0,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                }}
+                scrollEnabled={true}
+                zoomEnabled={true}
+              >
+                <Marker
+                  coordinate={{
+                    latitude: Number(item.coordinates.coordinates[1]) || 0,
+                    longitude: Number(item.coordinates.coordinates[0]) || 0,
+                  }}
+                  title={item.name || "Pharmacy Location"}
+                  pinColor="#2563EB"
+                />
+              </MapView>
+            </View>
+            <View className="flex-row items-center mt-4">
+              <Ionicons name="map-outline" size={20} color="#2563EB" />
+              <Text className="text-gray-600 ml-2 font-medium">
+                Coordinates: {Number(item.coordinates.coordinates[1]) ? Number(item.coordinates.coordinates[1]).toFixed(4) : "N/A"}, 
+                {Number(item.coordinates.coordinates[0]) ? Number(item.coordinates.coordinates[0]).toFixed(4) : "N/A"}
+              </Text>
+            </View>
+          </View>
+        )}
+        
       </View>
     </View>
   );
 }
+
+
+const styles = StyleSheet.create({
+  mapContainer: {
+    height: 300,
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#D1D5DB",
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject,
+  },
+});
