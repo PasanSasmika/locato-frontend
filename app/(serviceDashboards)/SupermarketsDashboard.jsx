@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   View, Text, TextInput, ScrollView, TouchableOpacity, Image,
   ActivityIndicator, Alert, KeyboardAvoidingView, Platform, SafeAreaView,
+  StyleSheet
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -9,6 +10,7 @@ import * as FileSystem from 'expo-file-system/legacy';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
+import MapView, { Marker } from 'react-native-maps';
 
 // Reusable Components
 const FormField = ({ label, value, onChangeText, placeholder, keyboardType = 'default', multiline = false }) => (
@@ -71,7 +73,6 @@ export default function CreateSupermarket() {
     deliveryAvailable: null,
     paymentMethods: [],
     areasCovered: [],
-    rating: 0,
     categoriesAvailable: [],
     parkingAvailable: null,
     offersAvailable: '',
@@ -85,6 +86,7 @@ export default function CreateSupermarket() {
     storeHours: '',
     loyaltyProgram: '',
     onlineOrdering: null,
+    coordinates: { latitude: 6.9271, longitude: 79.8612 },
   });
 
   const [tempItem, setTempItem] = useState({ paymentMethod: '', area: '', category: '' });
@@ -96,6 +98,13 @@ export default function CreateSupermarket() {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleMapPress = (e) => {
+    setFormData(prev => ({
+      ...prev,
+      coordinates: e.nativeEvent.coordinate,
+    }));
   };
 
   const handleAddItem = (listName, item) => {
@@ -127,16 +136,17 @@ export default function CreateSupermarket() {
             { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }
           );
           const base64 = await FileSystem.readAsStringAsync(compressed.uri, {
-encoding: 'base64',          });
+            encoding: 'base64',
+          });
           processedImages.push(`data:image/jpeg;base64,${base64}`);
         }
         setFormData(prev => ({ ...prev, images: [...prev.images, ...processedImages] }));
-        setLoading(false);
       }
     } catch (err) {
       console.error('Image processing error:', err);
       setError('Failed to process images.');
-      setLoading(false);
+    } finally {
+        setLoading(false);
     }
   };
 
@@ -145,22 +155,15 @@ encoding: 'base64',          });
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      setError('Supermarket name is required.');
+    if (!formData.name.trim() || !formData.storeType || !formData.location.trim() || !formData.contactInfo.phone.trim()) {
+      setError('Please fill all required fields: Name, Store Type, Location, and Phone.');
       return false;
     }
-    if (!formData.storeType) {
-      setError('Store type is required.');
-      return false;
+    if (!formData.coordinates.latitude) {
+        setError('Please pin the location on the map.');
+        return false;
     }
-    if (!formData.location.trim()) {
-      setError('Location is required.');
-      return false;
-    }
-    if (!formData.contactInfo.phone.trim()) {
-      setError('Phone number is required.');
-      return false;
-    }
+    setError('');
     return true;
   };
 
@@ -179,7 +182,7 @@ encoding: 'base64',          });
       const API_URL = 'https://locato-backend-wxjj.onrender.com/api/supermarkets';
       await axios.post(API_URL, submissionData);
       Alert.alert('Success!', 'Supermarket listing has been created.');
-      router.back();
+      router.push('/profile/');
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred.');
     } finally {
@@ -192,14 +195,46 @@ encoding: 'base64',          });
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerClassName="p-6">
           <View className="flex-row items-center mb-6">
-            <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
+            <TouchableOpacity onPress={() => router.push('/profile/')} className="p-2 -ml-2">
               <Ionicons name="arrow-back" size={28} color="#1F2937" />
             </TouchableOpacity>
             <Text className="text-3xl font-bold text-gray-800 ml-2">Add New Supermarket</Text>
           </View>
+
           {error && <View className="bg-red-100 p-3 rounded-lg mb-4 border border-red-200">
             <Text className="text-red-700 text-center">{error}</Text>
           </View>}
+
+          <View className="bg-white p-5 rounded-2xl shadow-lg border border-gray-100 mb-6">
+            <Text className="text-xl font-semibold text-gray-700 mb-4">Pin Location on Map</Text>
+            <Text className="text-gray-600 mb-4 font-medium">Tap on the map to set the precise location. 🗺️</Text>
+            <View style={styles.mapContainer}>
+              <MapView
+                style={styles.map}
+                initialRegion={{
+                  latitude: formData.coordinates.latitude,
+                  longitude: formData.coordinates.longitude,
+                  latitudeDelta: 0.0922,
+                  longitudeDelta: 0.0421,
+                }}
+                onPress={handleMapPress}
+              >
+                {formData.coordinates.latitude && (
+                  <Marker
+                    coordinate={formData.coordinates}
+                    title={formData.name || 'New Supermarket Location'}
+                    pinColor="#2563EB"
+                  />
+                )}
+              </MapView>
+            </View>
+            <View className="flex-row items-center mt-3">
+              <Ionicons name="location-outline" size={20} color="#2563EB" />
+              <Text className="text-gray-600 ml-2 font-medium">
+                Coordinates: {formData.coordinates.latitude.toFixed(4)}, {formData.coordinates.longitude.toFixed(4)}
+              </Text>
+            </View>
+          </View>
 
           <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <Text className="text-xl font-semibold text-gray-700 mb-4">Basic Information</Text>
@@ -211,7 +246,6 @@ encoding: 'base64',          });
 
           <View className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-6">
             <Text className="text-xl font-semibold text-gray-700 mb-4">Services & Operations</Text>
-            <SelectionField label="Open Now" options={['Yes', 'No']} selectedValue={formData.isOpenNow} onSelect={v => handleChange('isOpenNow', v)} />
             <SelectionField label="Delivery Available" options={['Yes', 'No']} selectedValue={formData.deliveryAvailable} onSelect={v => handleChange('deliveryAvailable', v)} />
             <DynamicListField label="Payment Methods" placeholder="e.g., Credit Card" items={formData.paymentMethods} item={tempItem.paymentMethod} setItem={v => setTempItem(p => ({ ...p, paymentMethod: v }))} onAddItem={() => { if (handleAddItem('paymentMethods', tempItem.paymentMethod)) setTempItem(p => ({ ...p, paymentMethod: '' })); }} onRemoveItem={(i) => handleRemoveItem('paymentMethods', i)} />
             <DynamicListField label="Areas Covered" placeholder="e.g., Colombo" items={formData.areasCovered} item={tempItem.area} setItem={v => setTempItem(p => ({ ...p, area: v }))} onAddItem={() => { if (handleAddItem('areasCovered', tempItem.area)) setTempItem(p => ({ ...p, area: '' })); }} onRemoveItem={(i) => handleRemoveItem('areasCovered', i)} />
@@ -260,3 +294,16 @@ encoding: 'base64',          });
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+    mapContainer: {
+      height: 400,
+      borderRadius: 16,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: '#D1D5DB',
+    },
+    map: {
+      ...StyleSheet.absoluteFillObject,
+    },
+});
